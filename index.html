@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>서촌초 AI 발명 키오스크</title>
+  <style>
+    /* 전체 리셋 및 텍스트 선택 방지 (입력창 제외) */
+    * { 
+      box-sizing: border-box; 
+      font-family: 'Malgun Gothic', '맑은 고딕', sans-serif; 
+    }
+    body { 
+      margin: 0; padding: 0; width: 100vw; height: 100vh; display: flex; 
+      overflow: hidden; background-color: #f8f9fa; user-select: none; -webkit-user-drag: none;
+    }
+
+    /* 왼쪽 캔버스 구역 (60%) */
+    .left-panel { flex: 1.2; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #ffffff; position: relative; }
+
+    /* 대기 화면 */
+    .wait-screen { text-align: center; transition: opacity 0.3s; }
+    .main-title { font-size: 4rem; font-weight: 900; color: #212529; margin-bottom: 20px; }
+    .sub-title { font-size: 1.8rem; color: #868e96; font-weight: 600; }
+
+    /* 실제 발명 노트 UI */
+    .note-preview-screen {
+      display: none; width: 85%; max-width: 600px; border: 4px solid #34495e; border-radius: 15px; 
+      padding: 30px; background: #ffffff; box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    }
+    .note-header { text-align: center; border-bottom: 2px dashed #bdc3c7; padding-bottom: 15px; margin-bottom: 20px; }
+    .note-header h2 { color: #2c3e50; font-size: 2.2rem; margin: 0 0 5px 0; transition: color 0.3s; }
+    .note-header p { color: #7f8c8d; font-size: 1.2rem; margin: 0; font-weight: bold; }
+    
+    /* 스캔 및 진짜 이미지 출력 공간 */
+    .image-placeholder {
+      width: 100%; height: 280px; background: #f4f7f6; border: 2px solid #bdc3c7; border-radius: 10px; 
+      position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;
+    }
+    .placeholder-text { color: #95a5a6; font-size: 1.2rem; font-weight: bold; z-index: 10; }
+    
+    /* 레이저 스캔 효과 */
+    .scanner-line {
+      position: absolute; top: 0; left: 0; width: 100%; height: 5px; 
+      background: rgba(0, 255, 204, 0.8); box-shadow: 0 0 15px rgba(0, 255, 204, 0.8); 
+      animation: scan 2s ease-in-out infinite; z-index: 5;
+    }
+    @keyframes scan { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+
+    /* 실제 등장할 이미지 설정 (초기엔 숨김) */
+    #generatedImage {
+      display: none;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      z-index: 20;
+    }
+
+    /* 텍스트 구조화 공간 */
+    .note-details h3 { color: #2980b9; margin: 0 0 10px 0; font-size: 1.4rem; }
+    .note-details ul { list-style: none; padding: 0; margin: 0; }
+    .note-details li { font-size: 1.2rem; color: #34495e; margin-bottom: 12px; line-height: 1.5; }
+    .blink-text { animation: blinker 1.5s linear infinite; color: #e74c3c; font-weight: bold; }
+    @keyframes blinker { 50% { opacity: 0.3; } }
+
+    /* 오른쪽 제어 패널 (40%) */
+    .right-panel { 
+      flex: 0.8; background: linear-gradient(135deg, #212529, #343a40); padding: 50px 40px; 
+      display: flex; flex-direction: column; color: #ffffff; box-shadow: -10px 0 30px rgba(0,0,0,0.15); z-index: 10;
+    }
+
+    .step-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 25px; color: #66d9e8; display: flex; align-items: center; }
+    .step-title::before { content: ''; display: inline-block; width: 6px; height: 24px; background-color: #66d9e8; margin-right: 12px; border-radius: 3px; }
+
+    /* 키보드 직접 입력창 CSS */
+    .text-input {
+      width: 100%;
+      padding: 20px;
+      font-size: 1.4rem;
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1);
+      color: white;
+      margin-bottom: 40px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .text-input:focus { border-color: #3bc9db; background: rgba(255,255,255,0.15); }
+    .text-input::placeholder { color: #adb5bd; }
+
+    /* 디자인 컨셉 버튼 (6개 확장) */
+    .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+    
+    .opt-btn { 
+      background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.15); color: #e9ecef; 
+      padding: 20px 5px; border-radius: 12px; font-size: 1.2rem; font-weight: 700; cursor: pointer; 
+      transition: all 0.2s ease; text-align: center; 
+    }
+    .opt-btn:active { transform: scale(0.95); }
+    .opt-btn.selected { background: #3bc9db; border-color: #3bc9db; color: #212529; box-shadow: 0 0 20px rgba(59, 201, 219, 0.4); }
+
+    .start-btn { 
+      margin-top: auto; background: #fa5252; color: white; border: none; padding: 25px; 
+      font-size: 2rem; font-weight: 900; border-radius: 15px; cursor: pointer; 
+      transition: all 0.2s ease; box-shadow: 0 10px 25px rgba(250, 82, 82, 0.4); 
+    }
+    .start-btn:active { transform: scale(0.96); }
+    
+    /* 완료 알림 팝업 */
+    .toast-popup {
+      position: fixed; top: 50px; left: 50%; transform: translateX(-50%); background: #40c057; color: white; 
+      padding: 20px 40px; border-radius: 50px; font-size: 1.8rem; font-weight: 800; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2); opacity: 0; visibility: hidden; transition: all 0.5s ease; z-index: 100;
+    }
+    .toast-popup.show { opacity: 1; visibility: visible; }
+  </style>
+</head>
+<body>
+
+  <div id="toastPopup" class="toast-popup">✨ 인쇄가 완료되었습니다! 프린터를 확인하세요.</div>
+
+  <!-- 왼쪽 캔버스 구역 -->
+  <div class="left-panel">
+    
+    <div class="wait-screen" id="waitScreen">
+      <div class="main-title">💡 나만의 발명 노트 만들기</div>
+      <div class="sub-title">오른쪽 화면에 아이디어를 입력해주세요!</div>
+    </div>
+
+    <!-- 발명 노트 생성 화면 -->
+    <div class="note-preview-screen" id="notePreviewScreen">
+      <div class="note-header">
+        <h2 id="headerStatus">💡 <span class="blink-text">AI가 아이디어를 분석 중입니다...</span></h2>
+        <p>서촌초등학교 STEAM·AI 꼬마 발명가</p>
+      </div>
+      
+      <!-- 진짜 이미지가 등장할 공간 -->
+      <div class="image-placeholder">
+        <div class="scanner-line" id="scannerLine"></div>
+        <div class="placeholder-text" id="placeholderText">🎨 발명품 렌더링 진행 중...</div>
+        <!-- ★ 여기에 선생님이 미리 준비한 진짜 발명품 이미지를 넣으시면 됩니다 (로컬 파일명) -->
+        <img id="generatedImage" src="https://via.placeholder.com/600x300/34495e/ffffff?text=AI+Invention+Generated!" alt="발명품이미지">
+      </div>
+
+      <div class="note-details">
+        <h3>🔬 발명품 핵심 구조화</h3>
+        <ul>
+          <li><strong>[D] 일상 속 발견 :</strong> <span id="previewProblem" style="color:#7f8c8d; font-weight:bold;">입력된 문제를 분석하고 있습니다...</span></li>
+          <li><strong>[A] AI 아이디어 지원 :</strong> <span id="previewAssist" style="color:#7f8c8d;">기발한 해결책을 도출하는 중...</span></li>
+          <li><strong>[S] 핵심 기능 :</strong> <span id="previewFeature" style="color:#7f8c8d;">과학적 원리 설계 중...</span></li>
+        </ul>
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- 오른쪽 제어 구역 -->
+  <div class="right-panel">
+    
+    <div class="step-title">1. 무엇을 해결하고 싶나요?</div>
+    <!-- ★ 키보드 직접 입력창으로 변경됨 -->
+    <input type="text" id="problemInput" class="text-input" placeholder="예) 비 오는 날 우산 쓰기 귀찮아요" autocomplete="off">
+
+    <div class="step-title">2. 발명품 디자인 컨셉 (6가지)</div>
+    <!-- ★ 6가지 컨셉으로 확장됨 -->
+    <div class="btn-group btn-grid" id="styleGroup">
+      <div class="opt-btn" onclick="selectOption(this, 'styleGroup')">🚀 미래지향 3D</div>
+      <div class="opt-btn" onclick="selectOption(this, 'styleGroup')">🎨 따뜻한 동화책</div>
+      <div class="opt-btn" onclick="selectOption(this, 'styleGroup')">📐 정밀한 설계도</div>
+      <div class="opt-btn" onclick="selectOption(this, 'styleGroup')">🪄 마법 도구풍</div>
+      <div class="opt-btn" onclick="selectOption(this, 'styleGroup')">🌱 친환경 에코</div>
+      <div class="opt-btn" onclick="selectOption(this, 'styleGroup')">👾 픽셀 아트풍</div>
+    </div>
+
+    <button class="start-btn" onclick="startInvention()">✨ 발명 노트 생성하기!</button>
+  </div>
+
+  <script>
+    function selectOption(clickedBtn, groupID) {
+      const group = document.getElementById(groupID);
+      const buttons = group.getElementsByClassName('opt-btn');
+      for (let i = 0; i < buttons.length; i++) {
+        buttons[i].classList.remove('selected');
+      }
+      clickedBtn.classList.add('selected');
+    }
+
+    function startInvention() {
+      // 1. 값 입력 여부 확인
+      const problemText = document.getElementById('problemInput').value.trim();
+      const styleSelected = document.querySelectorAll('#styleGroup .selected').length;
+
+      if (problemText === '') {
+        alert("해결하고 싶은 문제를 입력해주세요!");
+        document.getElementById('problemInput').focus();
+        return;
+      }
+      if (styleSelected === 0) {
+        alert("디자인 컨셉을 1개 선택해주세요!");
+        return;
+      }
+
+      // 2. 대기 화면 끄고 실제 노트 양식 켜기
+      document.getElementById('waitScreen').style.display = 'none';
+      document.getElementById('notePreviewScreen').style.display = 'block';
+      
+      // 방문객이 입력한 글씨를 왼쪽 캔버스에 즉시 반영
+      document.getElementById('previewProblem').innerText = "「" + problemText + "」";
+      document.getElementById('previewProblem').style.color = "#e74c3c"; // 강조색
+
+      // 3. 3초 뒤에 레이저 끄고 '진짜 이미지' 띄우기 (마술 같은 연출)
+      setTimeout(() => {
+        document.getElementById('scannerLine').style.display = 'none';
+        document.getElementById('placeholderText').style.display = 'none';
+        document.getElementById('generatedImage').style.display = 'block'; // 실제 이미지 등장!
+        
+        // 텍스트 상태 업데이트
+        document.getElementById('headerStatus').innerHTML = "✨ 발명 노트 완성!";
+        document.getElementById('headerStatus').style.color = "#2c3e50";
+        document.getElementById('previewAssist').innerText = "입력하신 문제에 완벽하게 대응하는 솔루션이 스케치되었습니다.";
+        document.getElementById('previewAssist').style.color = "#2c3e50";
+        document.getElementById('previewFeature').innerText = "출력된 인쇄물에서 세부 원리를 확인하세요!";
+        document.getElementById('previewFeature').style.color = "#2c3e50";
+      }, 3000); // 3초 (3000ms)
+
+      // 4. 1분 30초 전체 타이머 후 완전 리셋
+      setTimeout(() => {
+        const toast = document.getElementById('toastPopup');
+        toast.classList.add('show');
+        
+        // 화면 리셋
+        document.getElementById('notePreviewScreen').style.display = 'none';
+        document.getElementById('waitScreen').style.display = 'block';
+        
+        // 입력값 리셋
+        document.getElementById('problemInput').value = '';
+        const allBtns = document.querySelectorAll('.opt-btn');
+        allBtns.forEach(btn => btn.classList.remove('selected'));
+
+        // 스캔 및 이미지 상태 원래대로 돌려놓기 (다음 사람을 위해)
+        document.getElementById('scannerLine').style.display = 'block';
+        document.getElementById('placeholderText').style.display = 'block';
+        document.getElementById('generatedImage').style.display = 'none';
+        
+        document.getElementById('headerStatus').innerHTML = "💡 <span class='blink-text'>AI가 아이디어를 분석 중입니다...</span>";
+        document.getElementById('previewProblem').innerText = "입력된 문제를 분석하고 있습니다...";
+        document.getElementById('previewProblem').style.color = "#7f8c8d";
+        document.getElementById('previewAssist').innerText = "기발한 해결책을 도출하는 중...";
+        document.getElementById('previewAssist').style.color = "#7f8c8d";
+        document.getElementById('previewFeature').innerText = "과학적 원리 설계 중...";
+        document.getElementById('previewFeature').style.color = "#7f8c8d";
+
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 4000);
+
+      }, 90000); // 90초 (1분 30초 대기)
+    }
+  </script>
+</body>
+</html>
