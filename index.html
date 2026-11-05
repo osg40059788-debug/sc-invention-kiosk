@@ -1,261 +1,2181 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>서촌초 AI 발명 키오스크</title>
-  <style>
-    /* 전체 리셋 및 텍스트 선택 방지 (입력창 제외) */
-    * { 
-      box-sizing: border-box; 
-      font-family: 'Malgun Gothic', '맑은 고딕', sans-serif; 
-    }
-    body { 
-      margin: 0; padding: 0; width: 100vw; height: 100vh; display: flex; 
-      overflow: hidden; background-color: #f8f9fa; user-select: none; -webkit-user-drag: none;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>서촌초 AI 발명 키오스크</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif;display:flex;background:#eceef2;overflow:hidden;color:#1e2530}
+.jua{font-family:'Jua','Malgun Gothic',sans-serif}
 
-    /* 왼쪽 캔버스 구역 (60%) */
-    .left-panel { flex: 1.2; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #ffffff; position: relative; }
+/* ---------- 왼쪽 무대 ---------- */
+#stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:auto;padding:20px}
+.welcome{text-align:center}
+.welcome .row{display:flex;align-items:center;gap:18px;justify-content:center}
+.welcome h1{font-family:'Jua','Malgun Gothic',sans-serif;font-size:54px;font-weight:400;letter-spacing:1px}
+.welcome p{font-size:22px;color:#5b6472;margin-top:14px;font-weight:700}
+.toolbar{display:flex;gap:10px;margin-bottom:14px}
+.toolbar button{border:none;border-radius:10px;padding:11px 18px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit}
+.tb-print{background:#1e2530;color:#fff}
+.tb-reset{background:#fff;color:#1e2530;border:1.5px solid #c5cad3!important}
+.holder{position:relative;flex:none}
+.holder .sheet{position:absolute;top:0;left:0;transform-origin:top left;box-shadow:0 12px 40px rgba(0,0,0,.18)}
 
-    /* 대기 화면 */
-    .wait-screen { text-align: center; transition: opacity 0.3s; }
-    .main-title { font-size: 4rem; font-weight: 900; color: #212529; margin-bottom: 20px; }
-    .sub-title { font-size: 1.8rem; color: #868e96; font-weight: 600; }
+/* ---------- 오른쪽 패널 ---------- */
+.panel{width:500px;flex:none;background:#202329;color:#eef0f3;display:flex;flex-direction:column;padding:26px 24px 22px;overflow-y:auto;gap:18px}
+.lab{color:#46d3e6;font-weight:900;font-size:19px;border-left:4px solid #46d3e6;padding-left:10px;margin-bottom:12px}
+.lab small{color:#9aa3af;font-weight:500;font-size:13px;margin-left:6px}
+.inp{width:100%;padding:16px;border-radius:12px;border:1.5px solid #4a505a;background:#2c3037;color:#fff;font-size:17px;font-family:inherit;outline:none}
+.inp:focus{border-color:#46d3e6}
+.inrow{display:flex;gap:8px}
+.inrow .inp{flex:1}
+.btn-idea{flex:none;border:none;border-radius:12px;padding:0 16px;background:#46d3e6;color:#10252a;font-weight:900;font-size:15px;cursor:pointer;font-family:inherit}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chips button{background:#2c3037;color:#b9c0ca;border:1px solid #444a53;border-radius:20px;padding:6px 11px;font-size:12.5px;cursor:pointer;font-family:inherit}
+.chips button:hover{color:#fff;border-color:#46d3e6}
+.name-inp{padding:11px 14px;font-size:15px}
+.concepts{display:flex;flex-direction:column;gap:12px}
+.specs{display:flex;flex-direction:column;gap:8px}
+.sitem{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:#2a2e35;border:2px solid #3d424b;border-radius:13px;padding:12px 14px;color:#eef0f3;font-family:inherit;font-size:15.5px;line-height:1.45;cursor:pointer;word-break:keep-all;transition:.15s}
+.sitem:hover{border-color:#6b7280}
+.sitem .dot{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid #5b616b;display:grid;place-items:center}
+.sitem.sel{border-color:#46d3e6;background:#2c3a40;box-shadow:0 0 16px rgba(70,211,230,.35)}
+.sitem.sel .dot{border-color:#46d3e6}.sitem.sel .dot:after{content:'';width:10px;height:10px;border-radius:50%;background:#46d3e6}
+.sitem .tag{flex:none;margin-left:auto;font-size:11px;font-weight:700;color:#9aa3af;border:1px solid #4a505a;border-radius:20px;padding:2px 8px}
+.sitem.mine{border-style:dashed}
+.ccard .rec{display:inline-block;font-size:11px;font-weight:900;color:#1e2530;background:#ffd54a;border-radius:20px;padding:2px 8px;margin-left:4px}
+.picked{font-size:13.5px;color:#46d3e6;margin:-4px 0 10px;line-height:1.5;word-break:keep-all}
+.modebar{display:flex;align-items:center;gap:8px;margin:-6px 0 -4px}
+.badge{font-size:12.5px;font-weight:700;border-radius:20px;padding:4px 11px;background:#2c3037;color:#9aa3af;border:1px solid #444a53}
+.badge.on{background:#123b2f;color:#6ff0b8;border-color:#2c8a66}
+.setbtn{margin-left:auto;background:none;border:1px solid #4a505a;color:#c4cad3;border-radius:9px;padding:5px 11px;font-size:12.5px;cursor:pointer;font-family:inherit}
+.loading{border:1.5px dashed #46d3e6;border-radius:14px;padding:22px 16px;text-align:center;color:#9fe7f1;font-size:15px;line-height:1.6}
+.loading i{display:inline-block;width:10px;height:10px;border-radius:50%;background:#46d3e6;margin:0 3px;animation:bl 1s infinite}
+.loading i:nth-child(2){animation-delay:.15s}.loading i:nth-child(3){animation-delay:.3s}
+@keyframes bl{0%,100%{opacity:.2;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}
+.warn{font-size:12.5px;color:#ffb4a8;margin-bottom:8px;line-height:1.5}
+#setModal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:50}
+#setModal .box{width:min(520px,92vw);background:#fff;color:#1e2530;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:12px}
+#setModal h3{font-family:'Jua','Malgun Gothic',sans-serif;font-weight:400;font-size:24px}
+#setModal label{font-size:13px;font-weight:700;color:#566070}
+#setModal input[type=text],#setModal input[type=password]{width:100%;padding:11px;border:1.5px solid #c5cad3;border-radius:9px;font-size:14px;font-family:inherit;margin-top:4px}
+#setModal .note{font-size:12.5px;color:#566070;line-height:1.6;background:#f4f6f9;border-radius:9px;padding:10px 12px}
+#setModal .row{display:flex;gap:8px;justify-content:flex-end}
+#setModal .row button{border:none;border-radius:9px;padding:10px 16px;font-weight:700;cursor:pointer;font-family:inherit}
+.und{background:#262a31;border:1.5px solid #3d424b;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.fixes{font-size:13px;color:#c4cad3;line-height:1.6}
+.fixes b{color:#ffd54a}
+.slot{display:grid;grid-template-columns:78px 1fr;gap:6px 10px;align-items:start}
+.slot .sl{font-size:13.5px;font-weight:900;color:#eef0f3;padding-top:9px}
+.slot .sl small{display:block;font-weight:500;color:#8d95a1;font-size:11px}
+.slot input{width:100%;padding:9px 11px;border-radius:9px;border:1.5px solid #4a505a;background:#2f333a;color:#fff;font-size:15px;font-family:inherit;outline:none}
+.slot input:focus{border-color:#46d3e6}
+.slot .st{font-size:11px;font-weight:700;border-radius:20px;padding:1px 8px;margin-left:6px;vertical-align:1px}
+.st.ok{background:#123b2f;color:#6ff0b8}.st.chk{background:#3b3212;color:#ffd54a}.st.me{background:#12304a;color:#8fd0ff}
+.sugs{grid-column:2;display:flex;flex-wrap:wrap;gap:5px;margin-top:-2px}
+.sugs button{background:#2f333a;color:#b9c0ca;border:1px solid #4a505a;border-radius:16px;padding:3px 10px;font-size:12px;cursor:pointer;font-family:inherit}
+.sugs button:hover{border-color:#46d3e6;color:#fff}
+.amb{background:#322c1a;border:1.5px solid #6b5a22;border-radius:12px;padding:10px 12px}
+.amb p{font-size:14px;font-weight:700;color:#ffe08a;margin-bottom:7px}
+.amb .opts{display:flex;flex-wrap:wrap;gap:6px}
+.amb .opts button{background:#2a2e35;color:#eef0f3;border:1.5px solid #5b616b;border-radius:10px;padding:7px 11px;font-size:13.5px;cursor:pointer;font-family:inherit}
+.amb .opts button.on{border-color:#ffd54a;background:#4a3f16}
+.autos{font-size:12.5px;color:#9aa3af;line-height:1.6}
+.okbtn{border:none;border-radius:12px;padding:13px;background:#46d3e6;color:#10252a;font-weight:900;font-size:16px;cursor:pointer;font-family:inherit}
+.okbtn:disabled{background:#3a3f47;color:#7d8590;cursor:not-allowed}
+.kwbar{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;font-size:12px}
+.kwbar span{background:#1d3a40;color:#9fe7f1;border-radius:14px;padding:3px 9px}
+.miss{display:inline-block;font-size:11px;font-weight:700;color:#ffb4a8;border:1px solid #7a4a44;border-radius:12px;padding:1px 7px;margin-left:4px}
+.kwline{font-size:8.5pt;color:#566070;margin-top:1.2mm}
+.kwline b{color:var(--c)}
+.think{background:#1f2a2e;border:1.5px solid #2f5a63;border-radius:12px;padding:11px 13px;font-size:13px;line-height:1.65;color:#cfe9ee;margin-bottom:10px}
+.think b.h{display:block;color:#46d3e6;font-size:13.5px;margin-bottom:3px}
+.think .row{display:flex;flex-wrap:wrap;gap:4px 10px}
+.think .row span em{font-style:normal;color:#8fb7bf;margin-right:3px}
+.think ol{margin:4px 0 0 18px;padding:0}
+.sitem .why{display:block;font-size:12px;color:#8d95a1;margin-top:3px}
+.sitem .tag.lens{color:#46d3e6;border-color:#2f5a63}
+.care{font-size:12.5px;color:#ffd9a8;background:#3a2c18;border:1px solid #6b5022;border-radius:10px;padding:8px 11px;margin-bottom:10px;line-height:1.55}
+.sheetcare{font-size:8.5pt;color:#8a4b00;background:#fff4e0;border-radius:2mm;padding:1.6mm 3mm;text-align:center}
+.genc{width:100%;margin-top:12px;border:none;border-radius:14px;padding:16px;font-size:19px;font-family:'Jua','Malgun Gothic',sans-serif;color:#fff;cursor:pointer;
+  background:linear-gradient(110deg,#ff6b4a,#ff4fa3 35%,#7c5cff 70%,#12c2e9);background-size:200% 100%;animation:gshift 4s linear infinite;box-shadow:0 6px 24px rgba(124,92,255,.45);transition:.2s}
+.genc:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(255,79,163,.5)}
+.genc:disabled{background:#3a3f47;color:#7d8590;box-shadow:none;animation:none;cursor:not-allowed}
+@keyframes gshift{0%{background-position:0% 0}100%{background-position:200% 0}}
+/* 3열 비교 화면 */
+#compare{width:100%;max-width:1280px;display:none;flex-direction:column;gap:16px;align-self:stretch;margin:0 auto}
+#stage.cmp{justify-content:flex-start}
+.cbanner{display:flex;align-items:center;gap:14px;background:#1e2530;color:#fff;border-radius:16px;padding:14px 18px;flex-wrap:wrap}
+.cbanner .ptxt{flex:1;min-width:260px}
+.cbanner .ptxt small{display:block;color:#9fe7f1;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:2px}
+.cbanner .ptxt b{font-size:18px;line-height:1.4;word-break:keep-all}
+.cbanner .state{font-size:14px;font-weight:700;color:#ffd54a;word-break:keep-all}
+.cbanner .state.done{color:#6ff0b8}
+.cbanner .bgen{border:none;border-radius:12px;padding:12px 18px;background:#ef4444;color:#fff;font-family:'Jua','Malgun Gothic',sans-serif;font-size:18px;cursor:pointer;box-shadow:0 0 18px rgba(239,68,68,.45)}
+.cbanner .bgen:disabled{background:#3a3f47;color:#7d8590;box-shadow:none;cursor:not-allowed}
+.cgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:stretch}
+.icard{background:#fff;border:3px solid transparent;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;box-shadow:0 6px 20px rgba(30,37,48,.08);transition:.2s;position:relative}
+.icard:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(30,37,48,.14)}
+.icard.sel{border-color:var(--c);box-shadow:0 0 0 4px var(--cl),0 14px 32px rgba(30,37,48,.18)}
+.cgrid.has-sel .icard:not(.sel){opacity:.72}
+.icard .top{display:flex;align-items:center;gap:6px;padding:12px 14px 0;flex-wrap:wrap}
+.icard .kind{background:var(--c);color:#fff;font-size:12px;font-weight:700;border-radius:20px;padding:3px 10px}
+.icard .rec{background:#ffd54a;color:#1e2530;font-size:12px;font-weight:900;border-radius:20px;padding:3px 10px}
+.icard .num{margin-left:auto;font-family:'Jua','Malgun Gothic',sans-serif;color:var(--c);font-size:15px}
+.icard .ill{margin:10px 14px 0;border-radius:14px;overflow:hidden}
+.icard .miss{z-index:2}
+.icard .ill svg{width:100%;height:auto;display:block}
+.icard .body{padding:12px 16px 0;display:flex;flex-direction:column;gap:10px;flex:1}
+.icard h3{font-family:'Jua','Malgun Gothic',sans-serif;font-weight:400;font-size:23px;line-height:1.2;word-break:keep-all}
+.icard .line{font-size:14px;line-height:1.55;color:#3c4656;word-break:keep-all;background:var(--cl);border-radius:10px;padding:9px 11px}
+.icard .sub{font-size:12px;font-weight:900;color:#8a93a0;letter-spacing:.5px;margin-bottom:5px}
+.icard ol{list-style:none;display:flex;flex-direction:column;gap:5px}
+.icard ol li{display:flex;gap:7px;font-size:13px;line-height:1.4;word-break:keep-all}
+.icard ol li i{flex:none;width:19px;height:19px;border-radius:50%;background:var(--c);color:#fff;font-style:normal;font-size:11px;font-weight:900;display:grid;place-items:center;margin-top:1px}
+.icard ol li span{color:#6b7584}
+.icard .triz{font-size:13px;line-height:1.5;word-break:keep-all}
+.icard .triz b{display:inline-block;background:#1e2530;color:#fff;border-radius:6px;padding:2px 8px;font-size:12px;margin-bottom:4px}
+.icard .tool{font-size:12.5px;color:#3c4656;background:#f4f6f9;border-radius:8px;padding:6px 10px;word-break:keep-all}
+.icard .tool b{color:var(--c)}
+.icard .eff{font-size:13px;line-height:1.5;color:#3c4656;word-break:keep-all}
+.icard .pickb{margin:14px 16px 16px;border:2px solid var(--c);background:#fff;color:var(--c);border-radius:12px;padding:12px;font-size:16px;font-weight:900;cursor:pointer;font-family:inherit}
+.icard.sel .pickb{background:var(--c);color:#fff}
+.icard .miss{position:absolute;top:10px;right:10px}
+.cload{background:#fff;border-radius:20px;padding:60px 20px;text-align:center;font-size:18px;color:#566070}
+.cload i{display:inline-block;width:12px;height:12px;border-radius:50%;background:#7c5cff;margin:0 4px;animation:bl 1s infinite}
+.cload i:nth-child(2){animation-delay:.15s}.cload i:nth-child(3){animation-delay:.3s}
+.tb-back{background:linear-gradient(110deg,#7c5cff,#12c2e9);color:#fff}
+@media (max-width:1300px){.cgrid{grid-template-columns:repeat(3,minmax(220px,1fr))}}
+@media (max-width:1500px){.panel{width:430px}}
+.arch{display:flex;align-items:center;gap:10px;padding:11px 14px;color:#fff;background:linear-gradient(120deg,var(--c),var(--c2))}
+.arch svg{width:30px;height:30px;flex:none}
+.arch b{display:block;font-size:15.5px;line-height:1.2}
+.arch small{display:block;font-size:12px;opacity:.92;line-height:1.35}
+.arch .ano{margin-left:auto;font-family:'Jua','Malgun Gothic',sans-serif;font-size:22px;opacity:.9}
+.icard .ill{position:relative;aspect-ratio:26/17;background:var(--cl)}
+.icard .ill img{width:100%;height:100%;object-fit:cover;display:block}
+.icard .ill .ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,.55);backdrop-filter:blur(2px);font-size:13px;font-weight:700;color:#3c4656}
+.icard .ill .ov .sp{width:34px;height:34px;border-radius:50%;border:4px solid var(--cl);border-top-color:var(--c);animation:spin .9s linear infinite}
+.icard .ill .shine{position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%);background-size:250% 100%;animation:shine 1.6s linear infinite}
+.icard .ill .src{position:absolute;right:8px;bottom:8px;font-size:10.5px;font-weight:700;color:#fff;background:rgba(30,37,48,.6);border-radius:10px;padding:2px 8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shine{0%{background-position:150% 0}100%{background-position:-100% 0}}
+.archlegend{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:-6px}
+.archlegend div{font-size:12.5px;color:#566070;text-align:center}
+.concept img.cimg{width:48mm;height:31mm;object-fit:cover;border-radius:2mm;flex:none}
+.empty{border:1.5px dashed #444a53;border-radius:14px;padding:26px 16px;text-align:center;color:#8d95a1;font-size:15px;line-height:1.6}
+.ccard{display:flex;gap:12px;align-items:center;background:#2a2e35;border:2px solid #3d424b;border-radius:16px;padding:10px;cursor:pointer;text-align:left;color:#eef0f3;font-family:inherit;transition:.15s;width:100%}
+.ccard:hover{border-color:#6b7280}
+.ccard.sel{border-color:var(--c);box-shadow:0 0 0 3px var(--c),0 0 22px var(--c);background:#2f343c}
+.ccard svg{width:140px;height:92px;flex:none;border-radius:11px}
+.ccard .kind{display:inline-block;font-size:11.5px;font-weight:700;color:#fff;background:var(--c);border-radius:20px;padding:2px 9px;margin-bottom:5px}
+.ccard h4{font-family:'Jua','Malgun Gothic',sans-serif;font-weight:400;font-size:20px;line-height:1.2;margin-bottom:5px}
+.ccard p{font-size:13.5px;color:#c4cad3;line-height:1.45;word-break:keep-all}
+.ccard .check{margin-left:auto;flex:none;width:26px;height:26px;border-radius:50%;border:2px solid #555b64;display:grid;place-items:center;font-weight:900;color:transparent}
+.ccard.sel .check{background:var(--c);border-color:var(--c);color:#fff}
+.gen{margin-top:auto;border:none;border-radius:16px;padding:20px;background:#ef4444;color:#fff;font-size:26px;font-family:'Jua','Malgun Gothic',sans-serif;cursor:pointer;box-shadow:0 0 26px rgba(239,68,68,.45);transition:.15s}
+.gen:disabled{background:#3a3f47;color:#7d8590;box-shadow:none;cursor:not-allowed}
+.hint{font-size:12px;color:#7d8590;text-align:center;margin-top:-8px}
 
-    /* 실제 발명 노트 UI */
-    .note-preview-screen {
-      display: none; width: 85%; max-width: 600px; border: 4px solid #34495e; border-radius: 15px; 
-      padding: 30px; background: #ffffff; box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-    }
-    .note-header { text-align: center; border-bottom: 2px dashed #bdc3c7; padding-bottom: 15px; margin-bottom: 20px; }
-    .note-header h2 { color: #2c3e50; font-size: 2.2rem; margin: 0 0 5px 0; transition: color 0.3s; }
-    .note-header p { color: #7f8c8d; font-size: 1.2rem; margin: 0; font-weight: bold; }
-    
-    /* 스캔 및 진짜 이미지 출력 공간 */
-    .image-placeholder {
-      width: 100%; height: 280px; background: #f4f7f6; border: 2px solid #bdc3c7; border-radius: 10px; 
-      position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;
-    }
-    .placeholder-text { color: #95a5a6; font-size: 1.2rem; font-weight: bold; z-index: 10; }
-    
-    /* 레이저 스캔 효과 */
-    .scanner-line {
-      position: absolute; top: 0; left: 0; width: 100%; height: 5px; 
-      background: rgba(0, 255, 204, 0.8); box-shadow: 0 0 15px rgba(0, 255, 204, 0.8); 
-      animation: scan 2s ease-in-out infinite; z-index: 5;
-    }
-    @keyframes scan { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+/* ---------- A4 발명 노트 ---------- */
+.sheet{width:210mm;height:297mm;background:#fff;padding:11mm 12mm 9mm;display:flex;flex-direction:column;gap:3.6mm;overflow:hidden;font-size:10pt;color:#1e2530;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.sh-head{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2.5px solid #1e2530;padding-bottom:2.4mm}
+.brand{font-family:'Jua','Malgun Gothic',sans-serif;font-size:17pt;line-height:1}
+.brand small{display:block;font-family:'Noto Sans KR','Malgun Gothic',sans-serif;font-size:7pt;letter-spacing:2px;color:#8a93a0;margin-top:1.5mm;font-weight:700}
+.meta{display:flex;gap:6mm;font-size:9pt;align-items:flex-end}
+.meta b{color:#8a93a0;margin-right:1.5mm;font-weight:700}
+.meta .fill{display:inline-block;min-width:30mm;border-bottom:1px solid #9aa3af;padding:0 1mm;font-weight:700}
+.problem .plab{font-size:8pt;color:var(--c);font-weight:900;letter-spacing:1.5px}
+.problem h2{font-family:'Jua','Malgun Gothic',sans-serif;font-weight:400;font-size:22pt;line-height:1.25;word-break:keep-all;margin-top:.8mm}
+.concept{display:flex;gap:4mm;align-items:center;background:var(--cl);border-radius:4mm;padding:3mm 4mm;border-left:3mm solid var(--c)}
+.concept svg{width:38mm;height:25mm;flex:none}
+.concept .kind{display:inline-block;background:var(--c);color:#fff;font-size:7.5pt;font-weight:700;border-radius:10mm;padding:.6mm 2.6mm}
+.concept h3{font-family:'Jua','Malgun Gothic',sans-serif;font-weight:400;font-size:19pt;line-height:1.15;margin:1mm 0}
+.concept p{font-size:10pt;line-height:1.45;word-break:keep-all}
+.main{display:grid;grid-template-columns:1fr 57mm;gap:4mm;flex:1;min-height:0}
+.blue{border:1.5px solid #cdd7e3;border-radius:3mm;overflow:hidden;position:relative;min-height:0}
+.blue svg{width:100%;height:100%;display:block}
+.parts{display:flex;flex-direction:column;gap:2.2mm;min-height:0}
+.sec-t{font-weight:900;font-size:10pt;margin-bottom:1.6mm;display:flex;align-items:center;gap:1.8mm}
+.sec-t:before{content:'';width:1.4mm;height:3.8mm;background:var(--c);border-radius:1mm;flex:none}
+.part{display:flex;gap:2.2mm;align-items:flex-start}
+.part .n{width:5.6mm;height:5.6mm;border-radius:50%;background:var(--c);color:#fff;font-weight:900;font-size:8.5pt;display:grid;place-items:center;flex:none;margin-top:.3mm}
+.part b{display:block;font-size:9.5pt}
+.part span{font-size:8.5pt;color:#566070;line-height:1.4;word-break:keep-all}
+.spec{margin-top:auto;background:#f4f6f9;border-radius:2.5mm;padding:2.4mm 3mm;font-size:8.5pt;line-height:1.5;word-break:keep-all}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm}
+.stepbox{border:1.5px dashed var(--c);border-radius:3mm;padding:2.2mm;display:flex;gap:2mm;align-items:center}
+.stepbox svg{width:15mm;height:15mm;flex:none}
+.stepbox .sn{font-family:'Jua','Malgun Gothic',sans-serif;color:var(--c);font-size:11pt;line-height:1}
+.stepbox p{font-size:8.8pt;line-height:1.4;word-break:keep-all;margin-top:.8mm}
+.duo{display:grid;grid-template-columns:1.15fr 1fr;gap:4mm}
+.ba{display:grid;grid-template-columns:1fr 6mm 1fr;align-items:stretch}
+.ba>div{border-radius:2.5mm;padding:2.4mm 2.8mm;font-size:8.8pt;line-height:1.45;word-break:keep-all}
+.ba b{display:block;font-size:8pt;margin-bottom:.8mm}
+.before{background:#f1f2f4}.before b{color:#8a93a0}
+.after{background:var(--cl)}.after b{color:var(--c)}
+.ba .arr{display:grid;place-items:center;color:var(--c);font-weight:900;font-size:13pt;padding:0}
+.tech{font-size:9pt;line-height:1.5;word-break:keep-all}
+.tech b{display:inline-block;background:var(--cl);color:#1e2530;padding:.4mm 2mm;border-radius:1.5mm;margin-bottom:1mm}
+.bottom{display:flex;gap:5mm;align-items:flex-end}
+.bottom .grow{flex:1}
+.wline{border-bottom:1px solid #b8bfc9;height:7.5mm}
+.stamp{width:22mm;height:22mm;border:2px dashed #e24b5b;border-radius:50%;display:grid;place-items:center;color:#e24b5b;font-size:8pt;font-weight:700;text-align:center;line-height:1.3;flex:none}
+.foot{font-size:7pt;color:#9aa3af;text-align:center;border-top:1px solid #e3e7ec;padding-top:1.6mm}
 
-    /* 실제 등장할 이미지 설정 (초기엔 숨김) */
-    #generatedImage {
-      display: none;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      z-index: 20;
-    }
-
-    /* 텍스트 구조화 공간 */
-    .note-details h3 { color: #2980b9; margin: 0 0 10px 0; font-size: 1.4rem; }
-    .note-details ul { list-style: none; padding: 0; margin: 0; }
-    .note-details li { font-size: 1.2rem; color: #34495e; margin-bottom: 12px; line-height: 1.5; }
-    .blink-text { animation: blinker 1.5s linear infinite; color: #e74c3c; font-weight: bold; }
-    @keyframes blinker { 50% { opacity: 0.3; } }
-
-    /* 오른쪽 제어 패널 (40%) */
-    .right-panel { 
-      flex: 0.8; background: linear-gradient(135deg, #212529, #343a40); padding: 50px 40px; 
-      display: flex; flex-direction: column; color: #ffffff; box-shadow: -10px 0 30px rgba(0,0,0,0.15); z-index: 10;
-    }
-
-    .step-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 25px; color: #66d9e8; display: flex; align-items: center; }
-    .step-title::before { content: ''; display: inline-block; width: 6px; height: 24px; background-color: #66d9e8; margin-right: 12px; border-radius: 3px; }
-
-    /* 키보드 직접 입력창 CSS */
-    .text-input {
-      width: 100%;
-      padding: 20px;
-      font-size: 1.4rem;
-      border-radius: 12px;
-      border: 2px solid rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.1);
-      color: white;
-      margin-bottom: 40px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .text-input:focus { border-color: #3bc9db; background: rgba(255,255,255,0.15); }
-    .text-input::placeholder { color: #adb5bd; }
-
-    /* 디자인 컨셉 버튼 (6개 확장) */
-    .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
-    
-    .opt-btn { 
-      background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.15); color: #e9ecef; 
-      padding: 20px 5px; border-radius: 12px; font-size: 1.2rem; font-weight: 700; cursor: pointer; 
-      transition: all 0.2s ease; text-align: center; 
-    }
-    .opt-btn:active { transform: scale(0.95); }
-    .opt-btn.selected { background: #3bc9db; border-color: #3bc9db; color: #212529; box-shadow: 0 0 20px rgba(59, 201, 219, 0.4); }
-
-    .start-btn { 
-      margin-top: auto; background: #fa5252; color: white; border: none; padding: 25px; 
-      font-size: 2rem; font-weight: 900; border-radius: 15px; cursor: pointer; 
-      transition: all 0.2s ease; box-shadow: 0 10px 25px rgba(250, 82, 82, 0.4); 
-    }
-    .start-btn:active { transform: scale(0.96); }
-    
-    /* 완료 알림 팝업 */
-    .toast-popup {
-      position: fixed; top: 50px; left: 50%; transform: translateX(-50%); background: #40c057; color: white; 
-      padding: 20px 40px; border-radius: 50px; font-size: 1.8rem; font-weight: 800; 
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2); opacity: 0; visibility: hidden; transition: all 0.5s ease; z-index: 100;
-    }
-    .toast-popup.show { opacity: 1; visibility: visible; }
-  </style>
+@page{size:A4;margin:0}
+@media print{
+  html,body{height:auto;overflow:visible;background:#fff;display:block}
+  .panel,.toolbar,.welcome,#compare{display:none!important}
+  #stage{padding:0;display:block;overflow:visible}
+  .holder{width:auto!important;height:auto!important}
+  .holder .sheet{position:static;transform:none!important;box-shadow:none}
+}
+</style>
 </head>
 <body>
 
-  <div id="toastPopup" class="toast-popup">✨ 인쇄가 완료되었습니다! 프린터를 확인하세요.</div>
-
-  <!-- 왼쪽 캔버스 구역 -->
-  <div class="left-panel">
-    
-    <div class="wait-screen" id="waitScreen">
-      <div class="main-title">💡 나만의 발명 노트 만들기</div>
-      <div class="sub-title">오른쪽 화면에 아이디어를 입력해주세요!</div>
+<section id="stage">
+  <div class="welcome" id="welcome">
+    <div class="row">
+      <svg width="64" height="80" viewBox="0 0 64 80"><path d="M32 4C17 4 6 15 6 29c0 10 6 16 10 21 3 4 4 7 4 10h24c0-3 1-6 4-10 4-5 10-11 10-21C58 15 47 4 32 4z" fill="#ffd54a" stroke="#1e2530" stroke-width="3"/><rect x="20" y="62" width="24" height="7" rx="2" fill="#9aa3af" stroke="#1e2530" stroke-width="2.5"/><rect x="23" y="69" width="18" height="7" rx="3" fill="#6b7280" stroke="#1e2530" stroke-width="2.5"/><path d="M24 40l5 6 3-10 3 10 5-6" fill="none" stroke="#e08a00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <h1>나만의 발명 노트 만들기</h1>
     </div>
+    <p>오른쪽 화면에 아이디어를 입력해 주세요!</p>
+  </div>
+  <div class="toolbar" id="toolbar" style="display:none">
+    <button class="tb-print" onclick="window.print()">인쇄 / PDF로 저장</button>
+    <button class="tb-back" onclick="backToCompare()">3가지 발명품 다시 나란히 보기</button>
+    <button class="tb-reset" onclick="resetAll()">처음부터 다시 하기</button>
+  </div>
+  <div id="compare"></div>
+  <div class="holder" id="holder"></div>
+</section>
 
-    <!-- 발명 노트 생성 화면 -->
-    <div class="note-preview-screen" id="notePreviewScreen">
-      <div class="note-header">
-        <h2 id="headerStatus">💡 <span class="blink-text">AI가 아이디어를 분석 중입니다...</span></h2>
-        <p>서촌초등학교 STEAM·AI 꼬마 발명가</p>
-      </div>
-      
-      <!-- 진짜 이미지가 등장할 공간 -->
-      <div class="image-placeholder">
-        <div class="scanner-line" id="scannerLine"></div>
-        <div class="placeholder-text" id="placeholderText">🎨 발명품 렌더링 진행 중...</div>
-        <!-- ★ 여기에 선생님이 미리 준비한 진짜 발명품 이미지를 넣으시면 됩니다 (로컬 파일명) -->
-        <img id="generatedImage" src="https://via.placeholder.com/600x300/34495e/ffffff?text=AI+Invention+Generated!" alt="발명품이미지">
-      </div>
-
-      <div class="note-details">
-        <h3>🔬 발명품 핵심 구조화</h3>
-        <ul>
-          <li><strong>[D] 일상 속 발견 :</strong> <span id="previewProblem" style="color:#7f8c8d; font-weight:bold;">입력된 문제를 분석하고 있습니다...</span></li>
-          <li><strong>[A] AI 아이디어 지원 :</strong> <span id="previewAssist" style="color:#7f8c8d;">기발한 해결책을 도출하는 중...</span></li>
-          <li><strong>[S] 핵심 기능 :</strong> <span id="previewFeature" style="color:#7f8c8d;">과학적 원리 설계 중...</span></li>
-        </ul>
-      </div>
+<aside class="panel">
+  <div class="modebar"><span class="badge" id="modeBadge">기본 모드</span><button class="setbtn" onclick="openSet()">AI 설정</button></div>
+  <div>
+    <div class="lab">1. 무엇을 해결하고 싶나요?</div>
+    <div class="inrow">
+      <input id="prob" class="inp" placeholder="여기를 눌러 타이핑하세요..." autocomplete="off">
+      <button class="btn-idea" onclick="analyzeInput()">아이디어<br>떠올리기</button>
     </div>
-    
+    <div class="chips" id="chips"></div>
   </div>
 
-  <!-- 오른쪽 제어 구역 -->
-  <div class="right-panel">
-    
-    <div class="step-title">1. 무엇을 해결하고 싶나요?</div>
-    <!-- ★ 키보드 직접 입력창으로 변경됨 -->
-    <input type="text" id="problemInput" class="text-input" placeholder="예) 비 오는 날 우산 쓰기 귀찮아요" autocomplete="off">
-
-    <div class="step-title">2. 발명품 디자인 컨셉 (6가지)</div>
-    <!-- ★ 6가지 컨셉으로 확장됨 -->
-    <div class="btn-group btn-grid" id="styleGroup">
-      <div class="opt-btn" onclick="selectOption(this, 'styleGroup')">🚀 미래지향 3D</div>
-      <div class="opt-btn" onclick="selectOption(this, 'styleGroup')">🎨 따뜻한 동화책</div>
-      <div class="opt-btn" onclick="selectOption(this, 'styleGroup')">📐 정밀한 설계도</div>
-      <div class="opt-btn" onclick="selectOption(this, 'styleGroup')">🪄 마법 도구풍</div>
-      <div class="opt-btn" onclick="selectOption(this, 'styleGroup')">🌱 친환경 에코</div>
-      <div class="opt-btn" onclick="selectOption(this, 'styleGroup')">👾 픽셀 아트풍</div>
-    </div>
-
-    <button class="start-btn" onclick="startInvention()">✨ 발명 노트 생성하기!</button>
+  <div>
+    <div class="lab">발명가 이름 <small>별명만 적어도 괜찮아요</small></div>
+    <input id="who" class="inp name-inp" placeholder="예: 발명왕 소니" maxlength="12" autocomplete="off">
   </div>
 
-  <script>
-    function selectOption(clickedBtn, groupID) {
-      const group = document.getElementById(groupID);
-      const buttons = group.getElementsByClassName('opt-btn');
-      for (let i = 0; i < buttons.length; i++) {
-        buttons[i].classList.remove('selected');
+  <div id="undSec" style="display:none">
+    <div class="lab">1-1. 이렇게 이해했어요. 맞나요? <small>잘못 읽은 곳은 고쳐 주세요</small></div>
+    <div class="und" id="und"></div>
+  </div>
+
+  <div>
+    <div class="lab">2. 어떤 문제를 해결할까요? <small>구체적인 문제 1개 고르기</small></div>
+    <div class="specs" id="specs">
+      <div class="empty">문제를 입력하고 <b>아이디어 떠올리기</b>를 누르면<br>더 구체적인 문제들이 여기에 나타나요.</div>
+    </div>
+  </div>
+
+  <div id="conceptSec" style="display:none">
+    <div class="picked" id="picked"></div>
+    <button type="button" class="genc" id="genc" onclick="genConcepts()">✨ 발명품 디자인 3개 생성하기</button>
+    <div class="concepts" id="concepts" style="display:none"></div>
+  </div>
+
+  <button class="gen" id="gen" disabled onclick="makeNote()">발명 노트 생성하기!</button>
+  <div class="hint" id="hint">구체적인 문제와 발명품을 고르면 버튼이 켜져요</div>
+</aside>
+
+<div id="setModal">
+  <div class="box">
+    <h3>AI 아이디어 모드 설정</h3>
+    <div class="note">AI 모드를 켜면 <b>어떤 문제든</b> Google Gemini가 그 문제에 딱 맞는 구체적인 문제와 기발한 발명 컨셉을 새로 만들어 줘요. 끄거나 인터넷이 끊기면 이 파일에 들어 있는 기본 아이디어 사전으로 자동 전환돼요.<br><b>주의</b> · 입력한 문제 문장은 Google로 전송돼요. 이름·학교·반 같은 개인정보는 문제에 쓰지 않도록 지도해 주세요. API 키는 이 컴퓨터의 이 브라우저에만 저장돼요.</div>
+    <label><input type="checkbox" id="aiOn"> AI 모드 사용</label>
+    <label>Gemini API 키 (Google AI Studio에서 발급)<input type="password" id="aiKey" placeholder="AIza..." autocomplete="off"></label>
+    <label>글 생성 모델 이름<input type="text" id="aiModel" placeholder="gemini-2.5-flash"></label>
+    <label><input type="checkbox" id="aiImg"> 발명품 3D 동화 일러스트도 AI로 그리기 (3장 동시 생성)</label>
+    <label>이미지 생성 모델 이름 <span style="font-weight:500">(모델 이름은 바뀔 수 있어요 · Google AI Studio에서 확인)</span><input type="text" id="aiImgModel" placeholder="gemini-2.5-flash-image"></label>
+    <div class="row"><button style="background:#eceef2" onclick="closeSet()">취소</button><button style="background:#1e2530;color:#fff" onclick="saveSet()">저장</button></div>
+  </div>
+</div>
+
+<script>
+/* ===================== 1. 대상(누구의 문제인가) ===================== */
+const TARGETS = [
+  {id:'dog', grp:'awd',  keys:['강아지','반려견','댕댕','멍멍이','애완견',/(^|\s)개(가|는|를|의|와|랑|\s|$)/], name:'강아지', food:'사료'},
+  {id:'cat', grp:'aw',  keys:['고양이','냥이','반려묘'], name:'고양이', food:'사료'},
+  {id:'fish', grp:'af', keys:['물고기','금붕어','어항','구피','열대어'], name:'물고기', food:'먹이'},
+  {id:'pet', grp:'a',  keys:['햄스터','토끼','앵무새','병아리','고슴도치','거북이','거북'], name:null, food:'먹이'},
+  {id:'plant', grp:'p',keys:['식물','화분','꽃','나무','텃밭','채소','새싹','화단','다육'], name:'식물', food:'영양제'},
+  {id:'baby', grp:'hk', keys:['아기','갓난'], name:'아기', food:'분유'},
+  {id:'elder', grp:'hg',keys:['할머니','할아버지','어르신','노인'], name:null, food:'식사'},
+  {id:'kid', grp:'hk',  keys:['동생','친구','학생','어린이','우리 반','교실','급식','숙제','준비물','책가방'], name:null, food:'간식'},
+  {id:'adult', grp:'hg',keys:[/\d{1,2}\s?대\s?(여성|남성|여자|남자|엄마|아빠|직장인|어른|주부)?/,'여성','남성','직장인','아줌마','아저씨','어른','엄마','아빠','선생님','부모님','가족','택배'], name:null, food:'간식'}
+];
+function detectTarget(t){
+  for(const g of TARGETS){
+    for(const k of g.keys){
+      const m = (k instanceof RegExp) ? t.match(k) : null;
+      const hit = (k instanceof RegExp) ? !!m : t.includes(k);
+      if(hit){
+        let name = g.name;
+        if(m && g.id==='adult') name = m[0].trim();
+        if(!name){
+          if(g.id==='kid') name = ['동생','친구','학생','어린이'].includes(k) ? k : '친구들';
+          else if(g.id==='adult') name = ['택배'].includes(k) ? '가족' : k;
+          else name = k;
+        }
+        return {id:g.id, grp:g.grp, name, food:g.food};
       }
-      clickedBtn.classList.add('selected');
     }
+  }
+  return {id:'adult', grp:'hkg', name:'사람들', food:'간식'};
+}
 
-    function startInvention() {
-      // 1. 값 입력 여부 확인
-      const problemText = document.getElementById('problemInput').value.trim();
-      const styleSelected = document.querySelectorAll('#styleGroup .selected').length;
+/* ===================== 2. 문제 유형 + 유형별 컨셉 3가지 ===================== */
+/* 토큰: {T}=대상, {F}=먹이, {P}=문제 핵심, 뒤에 조사(가/를/는/와/에게/의)를 붙이면 받침에 맞게 바뀜 */
+const LIB = {
+ hunger:{keys:['배고','배가 고','밥','먹이','사료','굶','간식','먹을','먹지'], concepts:[
+  {shape:'dispenser',kind:'자동 로봇형',name:'냠냠 타이머 급식봇',
+   line:'정해진 시간마다 {T에게} 알맞은 양의 {F를} 자동으로 내어 줘요',
+   parts:[['{F} 저장통','하루치 {F가} 들어가는 투명한 통'],['시간 맞춤 타이머 화면','밥 먹을 시간을 미리 맞춰 둬요'],['회전 배출 모터','빙글 돌며 한 번에 한 숟가락씩 내려요'],['무게 센서 밥그릇','그릇 무게를 재서 너무 많이 주지 않아요']],
+   steps:['보호자가 밥 시간과 양을 미리 맞춰요','시간이 되면 모터가 돌며 {F가} 내려와요','{T는} 배고프지 않게 제때 밥을 먹어요'],
+   tech:'자동화하기 + 더하기 기법 (밥그릇 + 타이머 + 모터)',effect:'보호자가 없어도 규칙적으로 밥을 먹을 수 있고, 한꺼번에 많이 먹는 것도 막아 줘요.',
+   after:'시간이 되면 알아서 밥이 나와서 {T가} 배고프지 않아요',spec:'가로 25 × 세로 20 × 높이 38 cm · 투명 플라스틱 통, 스테인리스 그릇'},
+  {shape:'ball',kind:'놀이 장난감형',name:'킁킁 보물찾기 먹이볼',
+   line:'굴리고 놀면 {F가} 조금씩 나와서, 혼자서도 즐겁게 배를 채워 줘요',
+   parts:[['{F} 넣는 뚜껑','돌려서 열고 {F를} 채워요'],['구멍 크기 다이얼','나오는 양을 조절해요'],['말랑한 고무 껍질','이빨에도 안전하고 소리가 작아요'],['오뚝이 무게추','넘어져도 다시 일어나 계속 놀 수 있어요']],
+   steps:['먹이볼에 {F를} 넣고 다이얼을 맞춰요','{T가} 코와 발로 공을 굴려요','구멍에서 {F가} 톡톡 떨어져요'],
+   tech:'결합하기 기법 (장난감 + 밥그릇)',effect:'배고픔과 심심함을 한 번에 해결하고, 천천히 먹도록 도와줘요.',
+   after:'놀면서 조금씩 먹으니 배도 부르고 심심하지도 않아요',spec:'지름 12 cm · 식품용 실리콘, 무게추'},
+  {shape:'station',kind:'스마트 연결형',name:'멀리서도 밥 줘요 스마트 스테이션',
+   line:'보호자가 밖에서도 스마트폰으로 {T에게} 밥을 주고 목소리를 들려줘요',
+   parts:[['카메라','{T의} 모습을 실시간으로 보여 줘요'],['영상 화면 & 스피커','보호자 얼굴과 목소리를 전해요'],['간식 발사구','앱 버튼을 누르면 {F가} 나와요'],['충전 받침대','무선으로 전기를 채워요']],
+   steps:['스마트폰 앱으로 {T의} 모습을 확인해요','"밥 주기" 버튼을 누르면 {F가} 나와요','보호자 목소리를 들으며 안심하고 먹어요'],
+   tech:'연결하기 기법 (급식기 + 인터넷 + 영상통화)',effect:'멀리 있어도 돌볼 수 있고, {T가} 덜 불안해해요.',
+   after:'보호자와 연결되어 밥도 먹고 마음도 편안해요',spec:'가로 30 × 세로 15 × 높이 32 cm · 플라스틱, 와이파이 모듈'}
+ ]},
+ thirst:{keys:['목마','물을 안','물이 없','물이 부족','마실','시들','말라','마르','건조','물 주','물주','물을 주'], concepts:[
+  {shape:'dispenser',kind:'자동 로봇형',name:'졸졸 자동 물주기봇',
+   line:'물이 모자라면 센서가 알아채고 {T에게} 알맞게 물을 채워 줘요',
+   parts:[['물탱크','며칠 동안 쓸 물을 담아요'],['수분 감지 화면','물이 부족한지 확인해서 보여 줘요'],['작은 펌프','필요한 만큼만 물을 보내요'],['물 받침','물이 넘치지 않게 모아요']],
+   steps:['물탱크에 물을 가득 채워요','센서가 물이 부족한 것을 알아채요','펌프가 물을 졸졸 보내 줘요'],
+   tech:'자동화하기 기법 (센서 + 펌프)',effect:'깜빡해도 물이 떨어지지 않고, 필요한 만큼만 써서 물 낭비도 줄여요.',
+   after:'센서 덕분에 언제나 촉촉하게 물이 있어요',spec:'가로 20 × 세로 20 × 높이 35 cm · 플라스틱, 수분 센서'},
+  {shape:'cup',kind:'재미 디자인형',name:'빙글빙글 분수 물그릇',
+   line:'물이 분수처럼 돌며 깨끗해져서 {T가} 물을 더 자주 마시게 해요',
+   parts:[['분수 꼭지','물줄기가 퐁퐁 솟아 눈길을 끌어요'],['순환 펌프','물을 계속 돌려 신선하게 해요'],['숯 필터','먼지와 냄새를 걸러요'],['미끄럼 방지 받침','밀리거나 넘어지지 않아요']],
+   steps:['그릇에 물을 붓고 전원을 켜요','물이 빙글빙글 돌며 깨끗해져요','{T가} 신기해하며 물을 마셔요'],
+   tech:'모양 바꾸기 기법 (물그릇 → 분수)',effect:'늘 깨끗한 물을 즐겁게 마실 수 있어요.',
+   after:'분수가 신기해서 물을 자주 마셔요',spec:'지름 22 cm · 도자기 그릇, 소형 펌프'},
+  {shape:'station',kind:'스마트 연결형',name:'물 부족 알림 스테이션',
+   line:'물이 부족해지면 불빛과 스마트폰 알림으로 바로 알려 줘요',
+   parts:[['관찰 카메라','물 높이를 사진으로 찍어요'],['신호등 화면','초록·노랑·빨강으로 물 양을 보여 줘요'],['태양광 충전판','햇빛으로 전기를 만들어요'],['수위 센서 받침','물 높이를 재요']],
+   steps:['받침 위에 물그릇이나 화분을 올려요','물이 줄면 화면이 빨간색으로 바뀌어요','스마트폰 알림을 받고 물을 채워요'],
+   tech:'연결하기 기법 (센서 + 알림)',effect:'물 주기를 잊지 않게 되고 돌보는 책임감도 길러져요.',
+   after:'알림이 울려서 제때 물을 챙겨 줘요',spec:'가로 18 × 세로 12 × 높이 25 cm · 플라스틱, 태양광 패널'}
+ ]},
+ hot:{keys:['더워','더위','덥','땀','여름','뜨거','햇볕','햇빛이'], concepts:[
+  {shape:'pole',kind:'자동 로봇형',name:'시원바람 자동 선풍 타워',
+   line:'온도가 올라가면 스스로 켜져서 {T에게} 시원한 바람과 물안개를 보내 줘요',
+   parts:[['회전 날개','시원한 바람을 골고루 보내요'],['온도 센서 & 버튼','더워지면 스스로 켜져요'],['물안개 분사구','작은 물방울로 더 시원하게 해요'],['무게 받침대','넘어지지 않게 잡아 줘요']],
+   steps:['온도 센서가 더운 것을 알아채요','날개가 돌며 바람이 나와요','물안개까지 더해져 시원해져요'],
+   tech:'자동화하기 + 더하기 기법 (선풍기 + 온도 센서 + 분무기)',effect:'더위에 지치지 않고, 필요할 때만 켜져서 전기도 아껴요.',
+   after:'더워지면 알아서 시원한 바람이 불어요',spec:'높이 60 cm · 플라스틱, 온도 센서, 물탱크'},
+  {shape:'band',kind:'몸에 착용형',name:'쿨쿨 쿨링 넥밴드',
+   line:'목에 걸기만 하면 차가운 패드와 작은 바람이 {T의} 몸을 식혀 줘요',
+   parts:[['미니 팬','목 주변에 바람을 보내요'],['세기 버튼','바람 세기를 골라요'],['냉각 젤 밴드','차갑게 식혀 둔 젤이 열을 빼앗아요'],['충전 배터리','한 번 충전으로 오래 써요']],
+   steps:['밴드를 냉장고에 넣어 차갑게 해요','목에 걸고 버튼을 눌러요','어디서든 시원하게 지내요'],
+   tech:'작게 하기 기법 (선풍기를 몸에 걸기)',effect:'밖에서도 더위를 이기고 신나게 활동할 수 있어요.',
+   after:'밖에서도 목이 시원해서 덥지 않아요',spec:'둘레 38 cm · 실리콘, 냉각 젤'},
+  {shape:'box',kind:'친환경 설계형',name:'해바라기 그늘 쉼터',
+   line:'햇빛을 막고 태양광으로 환기팬을 돌려 {T에게} 시원한 그늘을 만들어 줘요',
+   parts:[['태양광 지붕','햇빛을 막고 전기를 만들어요'],['온도 표시등','안이 얼마나 시원한지 보여 줘요'],['환기 창','더운 공기를 밖으로 내보내요'],['쿨 매트 바닥','시원하게 누울 수 있어요']],
+   steps:['햇빛이 지붕을 비추면 전기가 생겨요','환기팬이 더운 공기를 내보내요','{T가} 그늘에서 시원하게 쉬어요'],
+   tech:'에너지 바꾸기 기법 (햇빛 → 바람)',effect:'전기요금 걱정 없이 더위를 피할 수 있어요.',
+   after:'그늘 쉼터에서 시원하게 쉬어요',spec:'가로 60 × 세로 50 × 높이 55 cm · 태양광 패널, 단열재'}
+ ]},
+ cold:{keys:['추워','추위','춥','겨울','얼어','차가워','시려'], concepts:[
+  {shape:'box',kind:'친환경 설계형',name:'포근포근 온열 하우스',
+   line:'찬바람을 막고 바닥을 데워서 {T가} 겨울에도 따뜻하게 지내게 해요',
+   parts:[['단열 지붕','따뜻한 공기가 빠져나가지 않게 해요'],['온도 조절판','알맞은 온도를 지켜 줘요'],['바람막이 커튼 문','찬바람을 막아요'],['온열 매트 바닥','바닥부터 따뜻하게 데워요']],
+   steps:['추워지면 온도 센서가 알아채요','바닥 온열 매트가 켜져요','{T가} 포근하게 쉬어요'],
+   tech:'감싸기 기법 (단열 + 온열)',effect:'추위 때문에 아프지 않고 편안하게 쉴 수 있어요.',
+   after:'포근한 집 안에서 따뜻하게 지내요',spec:'가로 55 × 세로 45 × 높이 50 cm · 단열 폼, 온열 매트'},
+  {shape:'band',kind:'몸에 착용형',name:'따끈따끈 온열 밴드',
+   line:'몸에 감기만 하면 알맞은 온도로 {T의} 몸을 따뜻하게 데워 줘요',
+   parts:[['발열 모듈','따뜻한 열을 만들어요'],['온도 버튼','3단계로 온도를 골라요'],['부드러운 밴드','몸을 편하게 감싸요'],['충전 배터리','하루 종일 따뜻해요']],
+   steps:['밴드를 몸에 감아요','버튼으로 온도를 골라요','밖에서도 따뜻하게 지내요'],
+   tech:'작게 하기 기법 (난로를 몸에 입기)',effect:'어디서든 체온을 지킬 수 있어요.',
+   after:'밴드 덕분에 밖에서도 따뜻해요',spec:'길이 45 cm · 발열 섬유, 배터리'},
+  {shape:'lamp',kind:'자동 로봇형',name:'햇살 온기 램프',
+   line:'{T가} 가까이 오면 스스로 켜져서 햇살처럼 따뜻하게 비춰 줘요',
+   parts:[['적외선 전등갓','햇살처럼 따뜻한 빛을 내요'],['감지 센서','가까이 오면 켜져요'],['따뜻한 빛','몸을 골고루 데워요'],['안전 받침대','넘어지면 자동으로 꺼져요']],
+   steps:['{T가} 램프 가까이 와요','센서가 알아채고 불이 켜져요','따뜻한 빛으로 몸이 데워져요'],
+   tech:'자동화하기 기법 (센서 + 전등)',effect:'필요할 때만 켜져서 안전하고 전기도 아껴요.',
+   after:'다가가면 따뜻한 빛이 나와 포근해요',spec:'높이 45 cm · 적외선 램프, 안전 스위치'}
+ ]},
+ forget:{keys:['잊','깜빡','까먹','챙기','준비물','분실','잃어','놓고','두고'], concepts:[
+  {shape:'station',kind:'스마트 연결형',name:'깜빡 방지 알림 스테이션',
+   line:'현관 앞에서 챙겨야 할 것을 화면과 목소리로 알려 줘 깜빡하지 않게 해요',
+   parts:[['얼굴 인식 카메라','누가 나가는지 알아봐요'],['할 일 화면','오늘 챙길 것을 보여 줘요'],['요일별 서랍','준비물을 미리 넣어 둬요'],['무게 센서 받침','물건을 챙겼는지 확인해요']],
+   steps:['전날 밤 준비물을 서랍에 넣어요','나갈 때 화면이 "잊은 것 있어요!"라고 알려요','모두 챙기면 초록불이 켜져요'],
+   tech:'알림 더하기 기법 (수납함 + 센서 + 음성)',effect:'잊어버리는 일이 줄고 스스로 챙기는 습관이 생겨요.',
+   after:'나가기 전에 알려 줘서 빠짐없이 챙겨요',spec:'가로 40 × 세로 20 × 높이 45 cm · 나무, 화면, 무게 센서'},
+  {shape:'band',kind:'몸에 착용형',name:'똑똑 알림 팔찌',
+   line:'해야 할 시간이 되면 손목에서 부르르 떨려 잊지 않게 해 줘요',
+   parts:[['작은 화면','할 일을 글자로 보여 줘요'],['확인 버튼','다 했으면 눌러요'],['진동 밴드','시간이 되면 부르르 떨려요'],['충전 단자','일주일에 한 번 충전해요']],
+   steps:['할 일과 시간을 미리 입력해요','시간이 되면 팔찌가 진동해요','버튼을 눌러 완료를 체크해요'],
+   tech:'작게 하기 + 알림 기법',effect:'늘 몸에 있어서 어디서든 할 일을 기억해요.',
+   after:'팔찌가 알려 줘서 잊지 않아요',spec:'둘레 16 cm · 실리콘, 진동 모터'},
+  {shape:'robot',kind:'자동 로봇형',name:'챙겨챙겨 비서 로봇',
+   line:'말로 한 약속을 기억했다가 시간에 맞춰 찾아와 알려 줘요',
+   parts:[['표정 화면','할 일을 웃는 얼굴로 알려요'],['음성 안테나','말로 할 일을 등록해요'],['집게 팔','물건을 건네줘요'],['바퀴','나를 찾아와요']],
+   steps:['"내일 줄넘기 챙겨 줘"라고 말해요','시간이 되면 로봇이 찾아와요','물건을 건네주며 알려 줘요'],
+   tech:'의인화 기법 (기억 도우미 로봇)',effect:'기억하는 부담이 줄고 계획 세우는 힘이 자라요.',
+   after:'로봇 비서가 알려 줘서 깜빡하지 않아요',spec:'높이 35 cm · 플라스틱, 음성 인식'}
+ ]},
+ mess:{keys:['털','날려','정리','어지','청소','지저분','쓰레기','먼지','더러','치우'], concepts:[
+  {shape:'robot',kind:'자동 로봇형',name:'척척 정리 로봇',
+   line:'떨어진 물건을 찾아 집어서 제자리에 척척 정리해 줘요',
+   parts:[['카메라 눈','떨어진 물건을 찾아요'],['물건 인식 안테나','물건 종류를 구분해요'],['집게 팔','물건을 집어 올려요'],['바퀴','구석구석 돌아다녀요']],
+   steps:['정리 시작 버튼을 눌러요','로봇이 물건을 찾아 집어요','알맞은 자리에 넣어 정리해요'],
+   tech:'자동화하기 기법 (카메라 + 집게)',effect:'정리 시간이 줄고 공간이 깨끗해져요.',
+   after:'로봇이 정리해 줘서 늘 깔끔해요',spec:'높이 40 cm · 플라스틱, 카메라'},
+  {shape:'box',kind:'재미 디자인형',name:'색깔 분류 정리함',
+   line:'물건을 넣기만 하면 색깔과 종류대로 알아서 나눠 담아 줘요',
+   parts:[['투입구 지붕','물건을 넣는 입구예요'],['가득참 알림등','꽉 차면 불이 켜져요'],['색깔 인식 센서','물건 색을 알아봐요'],['자동 분류 칸','알맞은 칸으로 보내요']],
+   steps:['물건을 지붕 입구에 넣어요','센서가 색깔과 종류를 알아봐요','알맞은 칸으로 쏙 들어가요'],
+   tech:'나누기 기법 (분류 + 수납)',effect:'분류하는 재미가 생기고 물건을 찾기 쉬워져요.',
+   after:'넣기만 하면 알아서 나눠져 찾기 쉬워요',spec:'가로 45 × 세로 30 × 높이 40 cm · 플라스틱, 색 센서'},
+  {shape:'ball',kind:'놀이 장난감형',name:'먼지 먹는 데굴볼',
+   line:'바닥을 데굴데굴 굴러다니며 먼지와 작은 쓰레기를 먹어 치워요',
+   parts:[['충전 뚜껑','전기를 채워요'],['불빛 표시등','먼지가 가득 차면 알려요'],['회전 솔 껍질','먼지를 쓸어 담아요'],['먼지 주머니','모은 먼지를 담아요']],
+   steps:['공을 바닥에 내려놓아요','데굴데굴 굴러다니며 먼지를 모아요','가득 차면 주머니를 비워요'],
+   tech:'모양 바꾸기 기법 (청소기 → 공)',effect:'구석구석 깨끗해지고 청소가 놀이가 돼요.',
+   after:'공이 굴러다니며 먼지를 치워 줘요',spec:'지름 15 cm · 플라스틱, 회전 솔'}
+ ]},
+ safety:{keys:['위험','다치','넘어','안전','미끄','사고','횡단','길을','길에서','부딪','화재','불이'], concepts:[
+  {shape:'band',kind:'몸에 착용형',name:'안전 지킴 스마트 밴드',
+   line:'넘어지거나 위험할 때 스스로 알아채고 보호자에게 바로 알려 줘요',
+   parts:[['SOS 화면','위험 상황과 위치를 보여 줘요'],['비상 버튼','꾹 누르면 보호자에게 연락해요'],['반사 밴드','밤에도 잘 보여요'],['넘어짐 감지 센서','넘어지면 알아채요']],
+   steps:['밴드를 손목에 차요','넘어지면 센서가 알아채요','보호자에게 위치와 알림이 가요'],
+   tech:'연결하기 기법 (센서 + 위치 알림)',effect:'위험한 순간에 빠르게 도움을 받을 수 있어요.',
+   after:'위험할 때 바로 도움을 받을 수 있어요',spec:'둘레 17 cm · 실리콘, 위치 추적 칩'},
+  {shape:'lamp',kind:'자동 로봇형',name:'반짝 경고 안전등',
+   line:'위험한 곳에 누군가 다가오면 불빛과 소리로 조심하라고 알려 줘요',
+   parts:[['경광 전등갓','빨간 불빛으로 알려요'],['동작 감지 센서','사람과 차를 알아봐요'],['경고 불빛','멀리서도 잘 보여요'],['태양광 받침','전선 없이 세울 수 있어요']],
+   steps:['위험한 장소에 안전등을 세워요','누군가 다가오면 센서가 알아채요','불빛과 소리로 경고해요'],
+   tech:'알림 더하기 기법 (센서 + 경고등)',effect:'사고를 미리 막고 모두를 지켜요.',
+   after:'미리 알려 줘서 조심할 수 있어요',spec:'높이 90 cm · 태양광 패널, LED'},
+  {shape:'robot',kind:'자동 로봇형',name:'앞장서 길잡이 로봇',
+   line:'앞장서서 장애물을 살피고 안전한 길로 안내해 줘요',
+   parts:[['표정 화면','가는 방향을 화살표로 보여 줘요'],['장애물 안테나','앞의 위험을 찾아요'],['안내 팔','손을 잡고 안내해요'],['튼튼한 바퀴','울퉁불퉁한 길도 가요']],
+   steps:['가고 싶은 곳을 말해요','로봇이 앞에서 위험을 살펴요','안전한 길로 함께 가요'],
+   tech:'의인화 기법 (안내하는 친구)',effect:'넘어지거나 부딪히는 일이 줄어요.',
+   after:'로봇이 앞장서서 안전하게 걸어요',spec:'높이 60 cm · 바퀴, 거리 센서'}
+ ]},
+ sleep:{keys:['늦잠','일어나','졸려','졸음','잠이','잠을','못 자','깨우','아침에'], concepts:[
+  {shape:'lamp',kind:'자동 로봇형',name:'아침 햇살 알람 램프',
+   line:'일어날 시간이 다가오면 햇살처럼 점점 밝아져서 상쾌하게 깨워 줘요',
+   parts:[['햇살 전등갓','아침에 점점 밝아져요'],['시간 설정 버튼','일어날 시간을 맞춰요'],['해돋이 불빛','자연스럽게 눈을 뜨게 해요'],['스피커 받침대','새소리 알람이 나와요']],
+   steps:['잘 때 일어날 시간을 맞춰요','30분 전부터 불빛이 밝아져요','햇살에 개운하게 일어나요'],
+   tech:'자연 흉내 내기 기법 (해돋이 따라 하기)',effect:'늦잠이 줄고 기분 좋게 하루를 시작해요.',
+   after:'햇살 불빛에 개운하게 일어나요',spec:'높이 30 cm · LED, 스피커'},
+  {shape:'robot',kind:'놀이 장난감형',name:'도망가는 알람 로봇',
+   line:'알람이 울리면 이리저리 도망 다녀서 일어나 잡아야만 꺼져요',
+   parts:[['알람 화면','시간과 표정을 보여 줘요'],['삐삐 안테나','알람 소리를 내요'],['끄기 버튼 팔','잡아서 눌러야 꺼져요'],['도망 바퀴','이리저리 도망 다녀요']],
+   steps:['알람 시간을 맞춰요','시간이 되면 울리며 도망가요','일어나서 잡아 끄면 잠이 깨요'],
+   tech:'거꾸로 하기 기법 (알람이 도망가기)',effect:'저절로 몸을 움직여서 잠이 확 깨요.',
+   after:'로봇을 잡으러 다니다 보면 잠이 깨요',spec:'높이 15 cm · 바퀴, 스피커'},
+  {shape:'band',kind:'몸에 착용형',name:'꿀잠 수면 밴드',
+   line:'잠을 잘 잤는지 기록하고 알맞은 때에 살살 진동으로 깨워 줘요',
+   parts:[['수면 화면','잠든 시간을 보여 줘요'],['기상 버튼','일어날 시간을 맞춰요'],['부드러운 밴드','편하게 차고 자요'],['진동 모듈','살살 흔들어 깨워요']],
+   steps:['밴드를 차고 잠자리에 들어요','잠든 시간을 스스로 기록해요','알맞은 때에 진동으로 깨워요'],
+   tech:'연결하기 기법 (센서 + 기록)',effect:'잠 습관을 스스로 살피고 고칠 수 있어요.',
+   after:'진동 알람으로 개운하게 일어나요',spec:'둘레 16 cm · 실리콘, 진동 모터'}
+ ]},
+ lonely:{keys:['혼자','외로','심심','쓸쓸','지루','놀아','보고 싶','보고싶'], concepts:[
+  {shape:'robot',kind:'자동 로봇형',name:'졸졸 친구 로봇',
+   line:'움직임을 알아채고 {T} 곁을 따라다니며 함께 놀아 줘요',
+   parts:[['표정 화면 눈','웃거나 윙크하며 감정을 표현해요'],['동작 감지 안테나','{T의} 움직임을 알아채요'],['놀이 팔','공을 굴리거나 장난감을 흔들어요'],['부드러운 바퀴','집 안 어디든 따라가요']],
+   steps:['{T가} 움직이면 안테나가 알아채요','로봇이 졸졸 따라가며 말을 걸어요','함께 놀며 외로움이 사라져요'],
+   tech:'의인화 기법 (기계에 친구 역할 주기)',effect:'혼자 있는 시간이 즐거워지고 스트레스가 줄어요.',
+   after:'친구 로봇과 놀아서 혼자 있어도 즐거워요',spec:'높이 30 cm · 플라스틱, 바퀴, 동작 센서'},
+  {shape:'ball',kind:'놀이 장난감형',name:'데굴데굴 스스로 놀이볼',
+   line:'스스로 굴러다니며 반짝여서 {T가} 혼자서도 신나게 놀게 해요',
+   parts:[['충전 단자','USB로 전기를 채워요'],['불빛 LED','알록달록 빛나서 관심을 끌어요'],['튼튼한 껍질','물어도 깨지지 않아요'],['자동 굴림 모터','혼자서 이리저리 굴러요']],
+   steps:['버튼을 눌러 놀이볼을 켜요','공이 스스로 굴러다니며 반짝여요','{T가} 쫓아가며 신나게 놀아요'],
+   tech:'움직임 더하기 기법 (공 + 모터)',effect:'운동량이 늘고 지루함이 줄어요.',
+   after:'스스로 움직이는 공 덕분에 심심하지 않아요',spec:'지름 8 cm · 실리콘, 소형 모터'},
+  {shape:'station',kind:'스마트 연결형',name:'보고싶어 영상 스테이션',
+   line:'보호자와 영상으로 얼굴을 보고 목소리를 나누며 외로움을 달래 줘요',
+   parts:[['카메라','{T의} 모습을 보여 줘요'],['영상 화면 & 마이크','얼굴을 보며 대화해요'],['칭찬 간식 버튼','멀리서 간식을 선물해요'],['받침대','안정적으로 세워 둬요']],
+   steps:['외로울 때 화면 앞으로 와요','보호자와 영상통화가 연결돼요','칭찬 간식까지 받고 마음이 편해져요'],
+   tech:'연결하기 기법 (영상통화 + 간식)',effect:'멀리 있어도 서로 연결되어 마음이 안정돼요.',
+   after:'보고 싶은 얼굴을 보며 마음이 편안해요',spec:'가로 28 × 세로 14 × 높이 30 cm · 화면, 카메라, 와이파이'}
+ ]},
+ family:{keys:['부부싸움','부모님이 싸','부모님이 다투','엄마 아빠가 싸','엄마랑 아빠가 싸','부모님 싸움','엄마 아빠가 다투'], concepts:[
+  {shape:'station',kind:'마음 날씨형',name:'우리 가족 마음 날씨 스테이션',
+   line:'가족이 매일 마음 날씨(맑음·흐림·비)를 눌러 서로의 기분을 미리 알고, 다툼이 시작되면 "잠깐 쉬어요" 버튼으로 10분 쉬어 가요',
+   parts:[['가족 얼굴 카메라','누가 마음 날씨를 남겼는지 알아봐요'],['마음 날씨 화면','가족마다 맑음·흐림·비로 기분을 보여 줘요'],['잠깐 쉬어요 버튼','누르면 조용한 음악과 10분 타이머가 켜져요'],['받침대','거실에 세워 둬요']],
+   steps:['아침에 가족 모두 마음 날씨를 눌러요','흐린 사람이 있으면 서로 더 다정하게 말해요','다툼이 시작되면 잠깐 쉬어요 버튼으로 10분 쉬어요'],
+   tech:'미리 알기 + 쉬어 가기 기법 (마음 날씨 공유)',effect:'서로의 기분을 미리 알아 다툼이 커지기 전에 멈출 수 있어요.',
+   after:'마음 날씨를 나누니 다툼이 줄고 대화가 늘어요',spec:'가로 25 × 세로 12 × 높이 28 cm · 화면, 스피커, 타이머'},
+  {shape:'box',kind:'고마움 찾기형',name:'가족 고마워 보물상자',
+   line:'가족에게 고마운 점을 쪽지로 모으고 주말마다 함께 읽어요. 다툰 날에는 "먼저 미안해" 화해 쿠폰을 꺼내 건네요',
+   parts:[['쪽지 투입 지붕','고마운 마음 쪽지를 넣어요'],['고마움 표시등','쪽지가 쌓일수록 밝아져요'],['화해 쿠폰 서랍','"먼저 미안해" 쿠폰이 들어 있어요'],['튼튼한 바닥','식탁 옆에 둬요']],
+   steps:['가족에게 고마운 점을 쪽지에 써서 넣어요','다툰 날에는 화해 쿠폰을 꺼내 건네요','주말 저녁 온 가족이 쪽지를 함께 읽어요'],
+   tech:'거꾸로 하기 기법 (서운함 대신 고마움 찾기)',effect:'서로의 좋은 점을 자주 떠올려 다툼보다 웃음이 많아져요.',
+   after:'고마운 마음이 쌓여 집 안에 웃음이 늘어요',spec:'가로 25 × 세로 20 × 높이 20 cm · 나무, LED'},
+  {shape:'lamp',kind:'대화 규칙형',name:'번갈아 말하는 대화 등불',
+   line:'불이 켜진 사람만 1분씩 번갈아 말하고 나머지는 끝까지 들어요. 목소리가 커지면 불빛이 주황·빨강으로 바뀌어 알려 줘요',
+   parts:[['차례 전등갓','말할 차례인 사람 쪽으로 불이 켜져요'],['1분 타이머 버튼','한 사람씩 1분씩 번갈아 말해요'],['목소리 크기 불빛','소리가 커지면 주황·빨강으로 바뀌어요'],['받침대','식탁 가운데 둬요']],
+   steps:['이야기할 때 대화 등불을 식탁 가운데 켜요','불이 켜진 사람만 1분 동안 말하고 나머지는 들어요','목소리가 커지면 불빛이 알려 줘서 차분해져요'],
+   tech:'규칙 바꾸기 기법 (번갈아 말하고 끝까지 듣기)',effect:'말이 겹치지 않고 서로 끝까지 들어서 싸움이 대화로 바뀌어요.',
+   after:'번갈아 말하고 들으니 싸움 대신 대화를 해요',spec:'높이 30 cm · LED, 소리 센서, 타이머'}
+ ]},
+ mind:{keys:['떨려','떨리','긴장','무서','두려','겁이','겁나','불안','걱정','부끄','창피','자신감'], concepts:[
+  {shape:'station',kind:'조금씩 연습형',name:'가상 관객 리허설 무대',
+   line:'화면 속 가상 관객 앞에서 미리 연습하면 박수와 질문을 해 주고, 관객 수를 조금씩 늘려 떨림에 익숙해지게 해요',
+   parts:[['관객 카메라','내 발표 모습을 찍어요'],['가상 관객 화면','박수 치고 고개를 끄덕이는 관객이 나와요'],['관객 수 다이얼','1명부터 30명까지 늘려요'],['받침대','책상 위에 세워요']],
+   steps:['관객 1명 앞에서 연습을 시작해요','잘하면 관객 수가 조금씩 늘어나요','30명 앞에서도 괜찮으면 진짜 발표 준비 끝!'],
+   tech:'조금씩 늘리기 기법 (작은 성공 쌓기)',effect:'낯선 상황에 조금씩 익숙해져서 진짜 순간에도 덜 떨려요.',
+   after:'연습 무대 덕분에 떨리던 일이 익숙해졌어요',spec:'가로 30 × 세로 15 × 높이 28 cm · 화면, 카메라, 스피커'},
+  {shape:'band',kind:'마음 돌봄형',name:'두근두근 호흡 박자 밴드',
+   line:'가슴이 두근거릴 때 버튼을 누르면 손목에서 "들이쉬고, 내쉬고" 느린 박자로 진동해 마음을 차분하게 해 줘요',
+   parts:[['호흡 안내 화면','숨 쉬는 박자를 그림으로 보여 줘요'],['시작 버튼','떨리기 전에 꾹 눌러요'],['부드러운 밴드','손목에 편하게 차요'],['진동 모듈','느린 박자로 살살 떨려요']],
+   steps:['두근거리면 버튼을 꾹 눌러요','밴드가 느린 박자로 진동해요','박자에 맞춰 숨 쉬면 마음이 차분해져요'],
+   tech:'몸으로 마음 다루기 기법 (호흡 박자)',effect:'떨릴 때 스스로 마음을 가라앉히는 나만의 방법이 생겨요.',
+   after:'숨을 고르고 나니 차분하게 해낼 수 있어요',spec:'둘레 16 cm · 실리콘, 진동 모터, 작은 화면'},
+  {shape:'box',kind:'거꾸로 발상형',name:'떨림을 박수로 바꾸는 응원 단상',
+   line:'단상에 서서 떨리는 만큼 불빛이 화려해지고 박수 소리가 나서, 떨림이 "힘이 넘친다"는 신호로 바뀌어요',
+   parts:[['응원 불빛 지붕','떨림만큼 반짝여요'],['에너지 게이지','떨림 에너지가 얼마나 모였는지 보여 줘요'],['박수 스피커 칸','응원 박수 소리를 내요'],['떨림 감지 발판','발의 떨림을 알아채요']],
+   steps:['단상 발판 위에 서서 시작해요','떨릴수록 불빛과 박수 소리가 커져요','떨림이 멋진 무대 효과가 되어 웃으며 해내요'],
+   tech:'거꾸로 하기 기법 (떨림 → 응원 에너지)',effect:'떨림을 나쁜 것이 아니라 힘으로 느끼게 되어 자신감이 생겨요.',
+   after:'떨림이 응원 에너지로 바뀌어 자신 있게 해내요',spec:'가로 60 × 세로 40 × 높이 100 cm · 나무, LED, 진동 센서, 스피커'}
+ ]},
+ relation:{keys:['놀리','놀려','놀림','괴롭','따돌','왕따','무시','험담','흉을','말다툼','싸우','싸움','욕을','욕해','밀치','끼워 주지','안 놀아'], concepts:[
+  {shape:'band',kind:'마음 표현형',name:'마음 신호등 명찰',
+   line:'싫은 말을 들으면 명찰을 빨간불로 바꾸고 버튼을 눌러 "그만해 주세요"를 또박또박 대신 전해 줘요',
+   parts:[['마음 신호등 화면','빨강·노랑·초록으로 지금 기분을 보여 줘요'],['목소리 버튼','"그만해 주세요"를 또박또박 말해 줘요'],['명찰 줄','목에 편하게 걸어요'],['비밀 SOS 칩','길게 누르면 선생님께 도움 요청이 가요']],
+   steps:['싫은 말을 들으면 신호등을 빨간불로 바꿔요','목소리 버튼이 "그만해 주세요"라고 대신 말해 줘요','그래도 계속되면 SOS를 길게 눌러 선생님께 알려요'],
+   tech:'마음 보이게 하기 기법 (감정 → 색깔 신호)',effect:'말로 하기 어려운 마음을 쉽게 전하고, 놀리던 친구도 상대 마음을 알아차려요.',
+   after:'내 마음이 분명하게 전해져서 놀림이 줄어요',spec:'8 × 6 cm 명찰 · LED, 녹음 스피커, 무선 칩'},
+  {shape:'box',kind:'거꾸로 발상형',name:'놀림 말 칭찬 번역 우체통',
+   line:'놀리는 말이 떠오르면 우체통에 넣어요. 우체통이 그 말을 칭찬 말로 바꾼 카드를 내주고, 반 칭찬 점수가 올라가요',
+   parts:[['말 투입구 지붕','놀리고 싶은 말을 적어 넣어요'],['칭찬 점수판','반 전체 칭찬 수를 보여 줘요'],['칭찬 번역 카드 칸','칭찬 말로 바뀐 카드가 나와요'],['튼튼한 바닥','교실 뒤에 세워요']],
+   steps:['놀리고 싶은 말을 쪽지에 적어 넣어요','우체통이 칭찬 말로 바꾼 카드를 내줘요','칭찬 카드를 친구에게 건네면 반 점수가 올라가요'],
+   tech:'거꾸로 하기 기법 (놀림 → 칭찬)',effect:'놀리는 말이 오가던 교실에 서로 존중하는 말이 늘어나요.',
+   after:'놀림 대신 칭찬이 오가는 교실이 돼요',spec:'가로 35 × 세로 25 × 높이 45 cm · 나무, 카드 인쇄기, 점수판'},
+  {shape:'robot',kind:'역지사지형',name:'입장 바꿔 마음 거울 로봇',
+   line:'놀리는 말을 알아들으면, 그 말을 들은 친구의 속상한 표정을 거울처럼 보여 주며 "입장을 바꿔 볼까?" 하고 물어요',
+   parts:[['마음 거울 얼굴','들은 친구의 표정을 보여 줘요'],['말 듣는 안테나','놀리는 말을 알아들어요'],['생각 카드 팔','"입장 바꿔 생각하기" 카드를 건네요'],['바퀴','교실을 천천히 돌아다녀요']],
+   steps:['로봇이 놀리는 말을 알아들어요','들은 친구의 속상한 표정을 거울처럼 보여 줘요','생각 카드로 입장을 바꿔 생각하고 사과하게 도와요'],
+   tech:'역지사지 기법 (입장 바꿔 보기)',effect:'놀리는 친구가 스스로 멈추고 사과할 마음이 생겨요.',
+   after:'서로의 마음을 알게 되어 놀림이 멈춰요',spec:'높이 40 cm · 음성 인식, 화면, 바퀴'}
+ ]},
+ smudge:{keys:['액정','얼룩','지문','손자국','자국','뿌옇','김이 서','닦아도','닦기','손때','기름때','화면이 더러','화면이 지저분','화면이 잘 안 보'], concepts:[
+  {shape:'station',kind:'자동 세차형',name:'뽀득뽀득 {O} 세차 거치대',
+   line:'다 쓰고 거치대에 꽂아 두면 극세사 롤러가 자동 세차장처럼 {O를} 위아래로 쓱쓱 닦아 줘요',
+   parts:[['얼룩 찾기 카메라','지문과 얼룩이 어디 있는지 찾아요'],['반짝이는 {O}','닦인 곳은 투명하게 반짝여요'],['극세사 세차 롤러','위아래로 쓱쓱 지나가며 닦아요'],['충전 겸 거치 받침','꽂아 두는 동안 충전도 돼요']],
+   steps:['다 쓰고 나면 거치대에 꽂아 두어요','롤러가 위아래로 지나가며 얼룩을 닦아요','충전도 되고 화면도 반짝이는 채로 꺼내요'],
+   tech:'자동화하기 + 더하기 기법 (충전 거치대 + 세차 롤러)',effect:'따로 닦지 않아도 충전할 때마다 저절로 깨끗해져요.',
+   after:'충전하고 나면 {O가} 늘 반짝반짝해요',spec:'가로 12 × 세로 10 × 높이 20 cm · 극세사 롤러, 소형 모터, 무선 충전기'},
+  {shape:'phone',kind:'한 번에 쓱형',name:'쓱싹 와이퍼 케이스',
+   line:'케이스 옆 버튼을 밀면 자동차 와이퍼처럼 숨어 있던 극세사 바가 화면을 한 번에 쓱 닦아 줘요',
+   parts:[['연잎 코팅 윗면','지문이 덜 묻게 미끄럽게 코팅해요'],['극세사 와이퍼 바','화면 위를 한 번에 쓸어 닦아요'],['와이퍼 슬라이드 버튼','옆으로 밀면 와이퍼가 움직여요'],['와이퍼 보관 홈','안 쓸 때는 케이스 아래에 숨어요']],
+   steps:['화면에 얼룩이 보이면 옆 버튼을 쓱 밀어요','숨어 있던 와이퍼 바가 화면을 닦고 지나가요','천을 찾을 필요 없이 바로 깨끗한 화면을 봐요'],
+   tech:'옮겨 오기 기법 (자동차 와이퍼 → 휴대폰 케이스)',effect:'닦을 천을 찾거나 옷에 문지를 필요 없이 언제 어디서나 1초 만에 닦아요.',
+   after:'얼룩이 보이면 1초 만에 쓱 닦여요',spec:'휴대폰 케이스 · 실리콘, 극세사 바, 발수 코팅'},
+  {shape:'band',kind:'재치 게임형',name:'지문 도둑 잡는 극세사 팔찌',
+   line:'화면에 지문이 쌓이면 "지문 도둑 출몰!" 캐릭터가 나타나고, 극세사 팔찌로 쓱 닦으면 도둑이 잡혀 점수가 올라가요',
+   parts:[['지문 도둑 알림 화면','잡은 지문 도둑 수를 보여 줘요'],['출동 버튼','누르면 도둑 잡기 게임이 시작돼요'],['극세사 안쪽 밴드','손목을 쓱 문지르면 화면이 닦여요'],['포인트 저장 칩','깨끗하게 지킨 날을 기록해요']],
+   steps:['얼룩이 쌓이면 화면에 지문 도둑이 나타나요','팔찌 안쪽 극세사로 화면을 쓱 닦아요','도둑이 잡히며 점수와 반짝 효과가 터져요'],
+   tech:'게임화 + 결합하기 기법 (닦개 + 팔찌 + 캐릭터 놀이)',effect:'귀찮던 화면 닦기가 도둑 잡기 놀이가 되어 스스로 자주 닦게 돼요.',
+   after:'도둑 잡기 놀이 덕분에 화면이 늘 깨끗해요',spec:'둘레 17 cm · 극세사 원단, 실리콘, 작은 화면'}
+ ]},
+ exercise:{keys:['운동','살이','살 찌','살쪘','살찌','뱃살','다이어트','체중','몸무게','체력','움직이기 싫','걷기 싫'], concepts:[
+  {shape:'fridge',kind:'거꾸로 발상형',name:'스쿼트 10번! 냉장고 문지기',
+   line:'간식이 먹고 싶으면 스쿼트 10번을 해야 문이 "딸깍" 열려요. 먹고 싶은 마음이 곧 운동 버튼이 돼요',
+   parts:[['간식 금고 칸','좋아하는 간식이 잠겨 있어요'],['스쿼트 카운터 화면','앉았다 일어선 횟수를 세요'],['스마트 잠금 손잡이','목표를 채우면 딸깍 열려요'],['동작 감지 센서','제대로 앉았는지 확인해요']],
+   steps:['간식이 먹고 싶어 냉장고 앞에 서요','화면을 보며 스쿼트 10번을 해요','문이 열리면 운동도 저절로 끝나 있어요'],
+   tech:'거꾸로 하기 + 조건 걸기 기법 (간식의 문 = 운동의 문)',effect:'따로 시간을 내지 않아도 하루에 여러 번 저절로 몸을 움직이게 돼요.',
+   after:'간식을 먹을 때마다 운동이 저절로 쌓여요',spec:'냉장고 문에 붙이는 장치 15 × 10 cm · 동작 센서, 전자 잠금'},
+  {shape:'sofa',kind:'결합 발상형',name:'페달 밟아야 켜지는 드라마 소파',
+   line:'좋아하는 드라마를 보려면 소파 앞 페달을 밟아 전기를 만들어야 해요. 드라마가 재밌을수록 운동도 길어져요',
+   parts:[['등받이 화면','만든 전기와 칼로리를 보여 줘요'],['전기 저장 배터리','페달로 만든 전기를 모아요'],['푹신한 팔걸이','편하게 기대요'],['발 페달 발전기','밟는 만큼 TV 전기가 생겨요']],
+   steps:['소파에 앉아 TV를 켜요','페달을 밟아야 화면이 계속 켜져요','드라마 한 편이 끝나면 운동 한 편도 끝!'],
+   tech:'결합하기 기법 (소파 + 자전거 + 발전기)',effect:'좋아하는 일과 운동을 묶어서 싫은 마음 없이 몸을 움직여요.',
+   after:'드라마를 볼수록 다리가 튼튼해져요',spec:'소파 앞 페달 40 × 30 cm · 소형 발전기, 배터리'},
+  {shape:'shoe',kind:'칭찬 게임형',name:'칭찬 폭탄 춤추는 운동화',
+   line:'걸을 때마다 운동화가 반짝이며 "멋져요!"를 외치고, 목표를 채우면 가족에게 트로피를 보내요',
+   parts:[['걸음 센서','걸음 수를 세요'],['칭찬 스피커','응원 목소리를 들려줘요'],['반짝 LED 줄','걸을 때마다 빛나요'],['쿠션 밑창','발이 편해 오래 걸을 수 있어요']],
+   steps:['운동화를 신고 밖으로 나가요','한 걸음마다 불빛과 칭찬이 쏟아져요','목표를 채우면 가족 단체방에 트로피가 떠요'],
+   tech:'칭찬 더하기 기법 (신발 + 센서 + 응원)',effect:'운동이 칭찬받는 즐거운 일이 되어 스스로 더 걷고 싶어져요.',
+   after:'칭찬받는 재미에 매일 걷고 싶어요',spec:'운동화 한 켤레 · 걸음 센서, 스피커, LED'}
+ ]},
+ phone:{keys:['게임','유튜브','폰만','영상만','놓지 못','놓지 않','중독','사용 시간','너무 오래 봐','너무 많이 봐','보느라'], concepts:[
+  {shape:'box',kind:'의인화 발상형',name:'폰 재우는 꿈나라 침대 상자',
+   line:'폰을 침대 상자에 눕히면 자장가를 부르며 약속한 시간까지 재워 줘요. 폰을 잘 재우면 칭찬 포인트가 쌓여요',
+   parts:[['이불 뚜껑','폰을 폭 덮어 재워요'],['잠든 시간 화면','얼마나 잘 참았는지 보여 줘요'],['자장가 스피커','폰에게 자장가를 불러 줘요'],['무선 충전 매트','자는 동안 충전돼요']],
+   steps:['약속 시간에 폰을 침대 상자에 눕혀요','뚜껑이 닫히고 자장가가 흘러나와요','시간이 끝나면 충전된 폰과 칭찬 포인트를 받아요'],
+   tech:'의인화 + 거꾸로 하기 기법 (폰도 쉬어야 해요)',effect:'폰을 멀리하는 일이 벌이 아니라 돌봄 놀이가 돼요.',
+   after:'폰이 자는 동안 다른 일에 집중해요',spec:'25 × 15 × 10 cm · 나무, 무선 충전기, 타이머'},
+  {shape:'robot',kind:'장난꾸러기형',name:'폰 숨기는 장난꾸러기 로봇',
+   line:'약속 시간이 넘으면 로봇이 폰을 살금살금 가져가 숨고, 운동이나 퀴즈 미션을 해야 돌려줘요',
+   parts:[['장난꾸러기 표정 화면','남은 시간을 표정으로 보여 줘요'],['사용 시간 안테나','폰을 쓴 시간을 재요'],['살금살금 집게 팔','시간이 끝나면 폰을 가져가요'],['숨바꼭질 바퀴','폰을 숨기러 달려가요']],
+   steps:['폰 사용 시간을 로봇과 약속해요','시간이 넘으면 로봇이 폰을 들고 숨어요','미션을 해결해야 폰을 돌려받아요'],
+   tech:'의인화 + 게임화 기법',effect:'잔소리 대신 웃음으로 약속을 지키는 힘이 길러져요.',
+   after:'로봇과의 약속 덕분에 폰을 적당히 써요',spec:'높이 25 cm · 바퀴, 집게, 타이머'},
+  {shape:'station',kind:'함께하기형',name:'가족 폰 주차장',
+   line:'가족이 모두 폰을 주차하면 "가족 시간 포인트"가 쌓이고, 포인트로 가족 소풍 쿠폰을 받아요',
+   parts:[['가족 얼굴 카메라','누가 주차했는지 알아봐요'],['포인트 전광판','모인 가족 시간을 보여 줘요'],['주차 칸 충전기','폰을 꽂으면 충전돼요'],['받침대','거실에 세워 둬요']],
+   steps:['저녁 시간에 가족 모두 폰을 주차해요','주차한 시간만큼 포인트가 쌓여요','포인트로 가족 소풍 쿠폰을 받아요'],
+   tech:'함께하기 기법 (가족 모두 참여)',effect:'혼자 참는 것이 아니라 가족이 함께 지켜서 오래 가요.',
+   after:'폰 대신 가족과 이야기하는 시간이 늘어요',spec:'40 × 15 × 20 cm · 충전기, 화면'}
+ ]},
+ picky:{keys:['편식','채소','야채','당근','브로콜리','시금치','골고루','가려 먹','반찬'], concepts:[
+  {shape:'box',kind:'보물찾기형',name:'채소 먹으면 열리는 보물 도시락',
+   line:'채소 칸을 한 칸 비울 때마다 뚜껑 속 퍼즐 한 조각이 열려서, 다 먹으면 숨은 그림이 완성돼요',
+   parts:[['보물 뚜껑','퍼즐 조각이 숨어 있어요'],['먹은 칸 표시등','다 먹은 칸에 불이 켜져요'],['한 입 채소 칸','채소를 한 입 크기로 담아요'],['무게 센서 바닥','얼마나 먹었는지 재요']],
+   steps:['채소를 한 입 크기로 도시락에 담아요','한 칸을 비우면 퍼즐 한 조각이 열려요','다 먹으면 숨은 그림과 칭찬 도장이 나와요'],
+   tech:'게임화 기법 (먹기 = 퍼즐 맞추기)',effect:'채소를 먹는 것이 도전 놀이가 되어 한 입씩 늘려 가요.',
+   after:'퍼즐을 완성하고 싶어서 채소를 먹어요',spec:'20 × 15 × 6 cm · 식품용 플라스틱, 무게 센서'},
+  {shape:'robot',kind:'이야기꾼형',name:'채소 모험 이야기꾼 로봇',
+   line:'채소마다 모험 이야기를 들려주고, 한 입 먹을 때마다 이야기의 다음 장면을 열어 줘요',
+   parts:[['이야기 화면 얼굴','채소 주인공이 등장해요'],['한 입 감지 안테나','먹었는지 알아채요'],['포크 흔드는 팔','응원하며 박자를 맞춰요'],['바퀴','식탁 위를 천천히 다녀요']],
+   steps:['로봇이 "당근 기사의 모험"을 시작해요','한 입 먹으면 다음 장면이 열려요','다 먹으면 이야기의 결말이 나와요'],
+   tech:'이야기 입히기 기법 (음식에 캐릭터 주기)',effect:'낯선 음식에 친근한 마음이 생겨 스스로 맛보게 돼요.',
+   after:'이야기가 궁금해서 한 입 더 먹어요',spec:'높이 20 cm · 화면, 스피커'},
+  {shape:'station',kind:'직접 키우기형',name:'내가 키운 채소 먹방 스테이션',
+   line:'내가 직접 키운 채소가 자라는 모습을 매일 화면으로 보고, 수확 날 "먹방 파티"를 열어요',
+   parts:[['성장 카메라','채소가 자라는 모습을 찍어요'],['성장 일기 화면','매일 얼마나 컸는지 보여 줘요'],['물 주기 버튼','직접 물을 줘요'],['작은 텃밭 받침','채소를 키워요']],
+   steps:['씨앗을 심고 매일 물을 줘요','화면으로 쑥쑥 자라는 모습을 봐요','수확한 채소로 먹방 파티를 해요'],
+   tech:'경험 더하기 기법 (키우기 + 먹기)',effect:'내가 키운 채소라서 먹어 보고 싶은 마음이 생겨요.',
+   after:'내가 키운 채소는 맛있게 먹어요',spec:'40 × 25 × 45 cm · 화분, 카메라, LED'}
+ ]},
+ study:{keys:['공부','숙제','집중','책 읽','독서','시험','딴생각'], concepts:[
+  {shape:'lamp',kind:'자라는 보상형',name:'집중하면 꽃이 피는 스탠드',
+   line:'집중할수록 전등갓의 꽃잎이 하나씩 활짝 피고, 딴짓하면 꽃잎이 슬며시 오므라들어요',
+   parts:[['꽃잎 전등갓','집중할수록 꽃잎이 펴져요'],['집중 타이머 버튼','25분 공부, 5분 휴식을 알려요'],['따뜻한 공부 불빛','눈이 편한 빛을 내요'],['자세 감지 받침대','바른 자세인지 살펴요']],
+   steps:['공부를 시작하며 버튼을 눌러요','집중할수록 꽃잎이 하나씩 피어요','꽃이 활짝 피면 5분 쉬는 시간!'],
+   tech:'눈에 보이게 하기 기법 (집중 = 꽃 피우기)',effect:'보이지 않던 집중이 눈에 보여서 끝까지 해내고 싶어져요.',
+   after:'꽃을 피우고 싶어서 끝까지 집중해요',spec:'높이 40 cm · LED, 모터, 타이머'},
+  {shape:'robot',kind:'장난꾸러기형',name:'숙제 먹는 배고픈 괴물 로봇',
+   line:'다 한 숙제를 보여 주면 괴물이 "냠냠!" 배불러하고, 숙제를 미루면 배고프다고 조르며 삐져요',
+   parts:[['표정 화면','배부르면 웃고 배고프면 삐져요'],['숙제 스캐너 안테나','다 한 숙제를 확인해요'],['냠냠 팔','숙제를 받아 가요'],['바퀴','숙제 시간에 찾아와요']],
+   steps:['숙제 시간이 되면 괴물이 배고프다고 찾아와요','숙제를 끝내 괴물에게 보여 줘요','괴물이 배부르게 웃으며 칭찬해 줘요'],
+   tech:'의인화 기법 (숙제 = 괴물의 밥)',effect:'미루던 숙제가 친구를 돌보는 놀이가 돼요.',
+   after:'괴물을 배불리려고 숙제를 먼저 해요',spec:'높이 30 cm · 카메라, 화면, 바퀴'},
+  {shape:'band',kind:'몸에 착용형',name:'딴생각 콕! 집중 머리띠',
+   line:'고개가 오래 딴 곳을 향하면 살짝 진동으로 "여기 봐요!" 하고 알려 줘요',
+   parts:[['집중 화면','오늘 집중한 시간을 보여 줘요'],['시작 버튼','공부 시작을 알려요'],['부드러운 머리띠','편하게 써요'],['진동 모듈','딴생각할 때 콕 알려요']],
+   steps:['머리띠를 쓰고 버튼을 눌러요','오래 딴 곳을 보면 살짝 진동해요','공부가 끝나면 집중 시간을 확인해요'],
+   tech:'알림 더하기 기법 (머리띠 + 센서)',effect:'스스로 집중을 되찾는 습관이 생겨요.',
+   after:'진동 알림 덕분에 금방 다시 집중해요',spec:'둘레 50 cm · 실리콘, 기울기 센서, 진동 모터'}
+ ]},
+ generic:{keys:[], concepts:[
+  {shape:'robot',kind:'탐정 발상형',name:'진짜 원인 찾는 돋보기 탐정봇',
+   line:'‘{P}’ 문제가 왜 생기는지 돋보기로 진짜 원인을 찾아내고, 딱 맞는 해결 미션을 내 줘요',
+   parts:[['돋보기 눈 화면','문제 현장을 크게 살펴봐요'],['단서 수집 안테나','언제, 어디서 문제가 생기는지 기록해요'],['미션 카드 팔','오늘의 해결 미션 카드를 건네요'],['탐정 바퀴','문제 현장으로 출동해요']],
+   steps:['탐정봇이 문제 현장을 관찰해요','단서를 모아 진짜 원인을 찾아요','원인에 딱 맞는 해결 미션을 내 줘요'],
+   tech:'원인 찾기 기법 (문제를 쪼개어 보기)',effect:'겉으로 보이는 모습이 아니라 진짜 원인을 해결해서 문제가 다시 생기지 않아요.',
+   after:'원인을 알고 나니 문제가 다시 생기지 않아요',spec:'높이 35 cm · 카메라, 화면, 바퀴'},
+  {shape:'box',kind:'거꾸로 발상형',name:'문제 뒤집기 마법 상자',
+   line:'‘{P}’ 상황을 거꾸로 뒤집어, 오히려 신나는 게임과 보상으로 바꿔 줘요',
+   parts:[['뒤집기 지붕','문제를 넣으면 뒤집힌 미션이 나와요'],['점수판','해결할 때마다 점수가 올라가요'],['보상 서랍','목표를 채우면 선물이 열려요'],['튼튼한 바닥','어디든 둘 수 있어요']],
+   steps:['문제를 카드에 적어 상자에 넣어요','상자가 문제를 재미있는 미션으로 바꿔 줘요','미션을 해결하면 점수와 보상이 쏟아져요'],
+   tech:'거꾸로 하기 + 게임화 기법',effect:'싫고 귀찮던 일이 해 보고 싶은 도전이 돼요.',
+   after:'문제가 게임처럼 즐거운 도전이 되었어요',spec:'가로 35 × 세로 25 × 높이 30 cm · 나무, 점수판'},
+  {shape:'station',kind:'함께하기형',name:'응원단 연결 스테이션',
+   line:'‘{P}’ 문제를 혼자 끙끙대지 않도록 가족·친구 응원단을 연결해 함께 해결해요',
+   parts:[['응원 카메라','도전하는 모습을 찍어요'],['응원 메시지 화면','가족·친구 응원이 떠요'],['하이파이브 버튼','누르면 응원단에게 소식이 가요'],['받침대','잘 보이는 곳에 세워요']],
+   steps:['해결 목표를 화면에 적어요','도전할 때마다 응원단에게 소식이 가요','응원 메시지를 받으며 끝까지 해내요'],
+   tech:'함께하기 기법 (사람의 힘 연결)',effect:'혼자가 아니라는 마음 덕분에 포기하지 않고 끝까지 해결해요.',
+   after:'응원 덕분에 끝까지 해냈어요',spec:'가로 25 × 세로 12 × 높이 28 cm · 화면, 카메라'}
+ ]}
+};
 
-      if (problemText === '') {
-        alert("해결하고 싶은 문제를 입력해주세요!");
-        document.getElementById('problemInput').focus();
-        return;
-      }
-      if (styleSelected === 0) {
-        alert("디자인 컨셉을 1개 선택해주세요!");
-        return;
-      }
+/* ===== 3대 혁신 발명 아키텍처에 맞춰 사전 컨셉 보강 (각 유형마다 기술형·놀이형·시스템형이 하나씩) ===== */
+const C_ = (shape,kind,name,line,parts,steps,tech,effect,after,spec)=>({shape,kind,name,line,parts,steps,tech,effect,after,spec});
+LIB.hunger.concepts[2] = C_('box','역할 나누기형','가족 밥 당번 체크 보드','가족마다 밥 당번 요일을 정하고, 밥을 주면 자석을 옮겨요. 늦게 오는 날엔 가까운 가족·이웃이 대신 당번을 맡아요',
+  [['당번 지붕판','이번 주 밥 당번 순서가 붙어 있어요'],['완료 표시등','밥을 주면 초록불이 켜져요'],['자석 이름 칸','가족·이웃 이름 자석을 옮겨요'],['현관 받침','현관에 걸어 둬요']],
+  ['가족 회의로 밥 당번 요일을 정해요','밥을 주면 내 자석을 "완료" 칸으로 옮겨요','늦는 날엔 대신 당번에게 자석을 넘겨요'],
+  '규칙 바꾸기 기법 (혼자 기억 → 모두의 당번)','누가 언제 밥을 줬는지 한눈에 보여서 빠뜨리거나 두 번 주는 일이 없어요.','당번 약속 덕분에 {T가} 제때 밥을 먹어요','가로 30 × 세로 40 cm · 자석판, LED');
+LIB.thirst.concepts[2] = C_('cup','거꾸로 발상형','거꾸로 물병 자동 급수기','물병을 거꾸로 세워 두면 물이 줄어드는 만큼만 저절로 흘러나와, 전기 없이도 {T에게} 물을 채워 줘요',
+  [['거꾸로 세운 물병','물이 줄면 공기가 들어가며 물이 내려와요'],['물 높이 조절 받침','물이 넘치지 않는 높이를 지켜요'],['물 보충 눈금','남은 물이 얼마인지 보여 줘요'],['넓은 바닥','쓰러지지 않아요']],
+  ['물병에 물을 가득 채워 거꾸로 꽂아요','물이 줄어든 만큼만 저절로 흘러나와요','며칠 동안 물 걱정 없이 지내요'],
+  '거꾸로 하기 기법 (물을 주는 대신 스스로 채워지게)','전기도 사람 손도 없이 물이 떨어지지 않아요.','물이 스스로 채워져서 목마를 일이 없어요','지름 20 cm · 페트병 재활용, 플라스틱 받침');
+LIB.hot.concepts[1] = C_('band','시원 미션형','얼음 보석 시원 미션 목걸이','얼린 젤 보석을 목걸이에 끼우고, 물 마시기·그늘 쉬기 미션을 할 때마다 새 얼음 보석으로 바꿔 끼워요',
+  [['보석 끼움 틀','얼린 젤 보석을 끼워요'],['미션 버튼','미션을 마치면 눌러요'],['부드러운 목걸이 줄','목에 편하게 걸어요'],['보석 보관 주머니','얼린 보석을 차갑게 보관해요']],
+  ['아침에 얼린 젤 보석을 목걸이에 끼워요','물 마시기·그늘 쉬기 미션을 해요','미션을 마칠 때마다 새 보석으로 바꿔요'],
+  '게임화 기법 (더위 이기기 → 보석 모으기)','더위를 이기는 좋은 습관을 놀이처럼 자주 하게 돼요.','미션 놀이 덕분에 더위를 잘 이겨 내요','둘레 40 cm · 냉각 젤, 실리콘');
+LIB.cold.concepts[2] = C_('ball','흔들 놀이형','흔들흔들 손난로 친구볼','흔들수록 속의 철가루 주머니가 데워져 따뜻해지고, 따뜻해질수록 공의 얼굴이 활짝 웃어요',
+  [['웃음 표시 뚜껑','따뜻해지면 웃는 얼굴로 바뀌어요'],['온도 다이얼','얼마나 따뜻한지 보여 줘요'],['말랑한 겉감','손에 쏙 잡혀요'],['핫팩 주머니','흔들면 열이 나요']],
+  ['추울 때 친구볼을 흔들흔들 흔들어요','공이 따뜻해지며 웃는 얼굴이 돼요','두 손으로 꼭 쥐고 따뜻하게 지내요'],
+  '놀이 더하기 기법 (손난로 + 인형)','추운 날에도 즐겁게 손을 따뜻하게 지켜요.','흔들며 놀다 보니 손이 따뜻해요','지름 8 cm · 부드러운 천, 재사용 핫팩');
+LIB.forget.concepts[1] = C_('box','빙고 놀이형','깜빡 탈출 준비물 빙고판','전날 밤 챙긴 준비물마다 빙고 칸을 채우고, 한 줄이 완성되면 칭찬 스티커가 톡 나와요',
+  [['스티커 뚜껑','빙고가 되면 열려요'],['빙고 불빛','채운 칸에 불이 켜져요'],['준비물 칸','오늘 챙길 물건 그림 카드'],['책상 받침','책상 옆에 둬요']],
+  ['잠들기 전 준비물을 하나씩 가방에 넣어요','넣은 물건 칸을 눌러 불을 켜요','빙고가 되면 스티커를 받아요'],
+  '게임화 기법 (챙기기 → 빙고 놀이)','챙기는 일이 재밌어져서 스스로 준비하는 습관이 생겨요.','빙고 놀이로 준비물을 빠짐없이 챙겨요','가로 25 × 세로 25 cm · 나무, LED');
+LIB.forget.concepts[2] = C_('band','거꾸로 발상형','나를 따라오는 챙김 태그 고리','현관문 고리에 걸린 챙김 태그를 모두 가방으로 옮겨 달아야 문이 열려요. 물건이 나를 따라오게 판을 바꿔요',
+  [['태그 정보 창','어떤 물건 태그인지 보여 줘요'],['문 열림 버튼','태그를 다 옮기면 눌러요'],['챙김 고리 줄','가방에 태그를 달아요'],['태그 인식 칩','몇 개를 옮겼는지 알아봐요']],
+  ['챙길 물건마다 태그를 현관 고리에 걸어 둬요','나갈 때 태그를 가방으로 옮겨 달아요','태그를 다 옮겨야 "딸깍" 문이 열려요'],
+  '거꾸로 하기 + 조건 걸기 기법','기억하려 애쓰지 않아도 물건을 챙기는 순서가 저절로 생겨요.','태그 덕분에 물건을 두고 나오지 않아요','고리 10 cm · 태그 칩, 실리콘');
+LIB.mess.concepts[2] = C_('lamp','모두의 약속형','1분 정리 신호등 종','하루 두 번 신호등이 반짝이면 모두 함께 1분 동안 자기 주변을 정리해요. 혼자 치우는 대신 모두의 약속으로 바꿔요',
+  [['신호등 갓','정리 시간이 되면 반짝여요'],['시간 설정 버튼','정리 시간을 정해요'],['1분 불빛','남은 시간을 빛으로 보여 줘요'],['받침대','교실·거실 가운데 둬요']],
+  ['정해진 시간에 신호등이 반짝여요','모두 1분 동안 자기 주변을 정리해요','불빛이 꺼지면 정리 끝! 깨끗해진 곳을 둘러봐요'],
+  '규칙 바꾸기 기법 (혼자 청소 → 모두의 1분)','짧고 자주, 모두 함께 하니까 어질러질 틈이 없어요.','1분 약속 덕분에 늘 깔끔해요','높이 30 cm · LED, 타이머, 종소리');
+LIB.safety.concepts[1] = C_('box','탐험 놀이형','안전 영웅 탐험 지도','동네와 학교의 위험한 곳을 탐험하며 지도에 스티커로 표시하고, 안전 규칙을 지키면 영웅 배지를 받아요',
+  [['지도 뚜껑','우리 동네 지도가 그려져 있어요'],['영웅 배지 칸','규칙을 지키면 배지를 받아요'],['위험 스티커 칸','위험한 곳에 붙일 스티커'],['튼튼한 바닥','교실에 두고 함께 봐요']],
+  ['친구들과 위험한 곳을 찾아 지도에 붙여요','그곳에서 지킬 안전 규칙을 정해요','규칙을 지키면 영웅 배지를 받아요'],
+  '게임화 기법 (안전 → 영웅 탐험)','위험을 스스로 알아보는 눈이 생겨 사고를 미리 막아요.','탐험 놀이 덕분에 위험한 곳을 미리 조심해요','60 × 45 cm 지도 상자 · 종이, 스티커');
+LIB.safety.concepts[2] = C_('shoe','환경 바꾸기형','야광 발자국 안전길','넘어지기 쉬운 길 바닥에 야광 발자국을 붙여 밤에도 안전한 길이 저절로 보이게, 다니는 길 자체를 바꿔요',
+  [['야광 발자국 판','어두우면 은은하게 빛나요'],['미끄럼 방지 표면','밟아도 미끄럽지 않아요'],['방향 화살표','가야 할 방향을 알려 줘요'],['강한 접착 밑면','바닥에 단단히 붙어요']],
+  ['자주 다니는 길 바닥에 발자국을 붙여요','밤이 되면 발자국이 은은하게 빛나요','빛나는 길을 따라 안전하게 걸어요'],
+  '환경 바꾸기 기법 (사람 대신 길을 바꾸기)','불을 켜지 않아도 안전한 길이 보여서 넘어질 일이 줄어요.','빛나는 발자국 길 덕분에 밤에도 안전해요','발자국 한 장 12 × 25 cm · 야광 물질, 고무');
+LIB.sleep.concepts[2] = C_('box','순서 바꾸기형','꿈나라 기차 잠자리 순서 상자','양치·가방 챙기기·불 끄기를 기차 칸 순서대로 하나씩 채우면 마지막 칸에서 자장가가 나와요',
+  [['기차 지붕','칸을 채울수록 불이 켜져요'],['순서 표시등','지금 할 차례를 알려 줘요'],['할 일 기차 칸','잠자리 준비 카드가 들어 있어요'],['받침','침대 옆에 둬요']],
+  ['잘 시간에 기차 첫 칸 카드를 꺼내요','할 일을 하나씩 마치며 칸을 채워요','마지막 칸이 채워지면 자장가가 나와요'],
+  '순서 정하기 기법 (잠자리 준비 루틴)','매일 같은 순서로 준비해서 몸이 저절로 잘 준비를 해요.','꿈나라 기차 덕분에 제때 잠들어요','가로 40 × 세로 10 × 높이 12 cm · 나무, LED, 스피커');
+LIB.lonely.concepts[2] = C_('box','함께하기형','같이 놀자 깃발 우체통','외로울 때 깃발을 올리면 이웃·친구들이 보고 함께 놀러 오는 약속 신호예요. 혼자인 시간을 함께인 시간으로 바꿔요',
+  [['깃발 지붕','깃발을 올리면 신호가 가요'],['놀자 신호등','누가 놀 수 있는지 보여 줘요'],['놀이 제안 카드칸','함께 할 놀이 카드'],['받침','현관이나 창가에 둬요']],
+  ['심심할 때 깃발을 올려요','깃발을 본 친구·이웃이 놀자 신호를 보내요','함께 놀이 카드를 골라 같이 놀아요'],
+  '함께하기 기법 (혼자 → 함께)','외로움을 혼자 견디지 않고 주변 사람과 이어져요.','깃발 신호 덕분에 함께 노는 시간이 늘어요','가로 20 × 세로 15 × 높이 35 cm · 나무, 깃발, LED');
+LIB.study.concepts[2] = C_('box','함께 약속형','함께 집중 약속 보드','가족이나 친구와 같은 시간에 "25분 집중 약속"을 하고 모두 지키면 보드에 별이 켜져요. 함께라서 딴생각이 줄어요',
+  [['별 지붕','모두 약속을 지키면 별이 켜져요'],['25분 타이머','집중 시간을 함께 재요'],['폰 주차 칸','약속 시간엔 폰을 여기 둬요'],['식탁 받침','함께 공부하는 식탁에 둬요']],
+  ['가족·친구와 같은 시간에 공부를 시작해요','폰은 주차 칸에 두고 25분 집중해요','모두 지키면 별이 켜지고 함께 쉬어요'],
+  '함께하기 + 규칙 바꾸기 기법','혼자 버티는 대신 함께 지키니까 집중이 오래 가요.','함께하는 약속 덕분에 끝까지 집중해요','가로 30 × 세로 20 cm · 나무, LED, 타이머');
+LIB.relation.concepts[2] = C_('lamp','교실 문화형','입장 바꾸기 역할극 스포트라이트','일주일에 한 번 스포트라이트 아래에서 놀림 받은 친구의 역할을 해 보고 느낌을 나눠요. 교실의 말 문화를 함께 바꿔요',
+  [['스포트라이트 갓','역할극 주인공을 비춰요'],['차례 버튼','다음 역할로 바꿔요'],['마음 온도 불빛','느낀 마음을 색으로 나눠요'],['교실 받침대','교실 앞에 세워요']],
+  ['놀림 상황을 역할극 카드로 뽑아요','스포트라이트 아래서 서로 입장을 바꿔 연기해요','느낀 마음을 나누고 우리 반 말 약속을 정해요'],
+  '역지사지 + 규칙 바꾸기 기법','놀리는 말이 얼마나 아픈지 몸으로 느껴 교실 문화가 바뀌어요.','입장을 바꿔 보고 나니 놀림이 멈춰요','높이 50 cm · LED 조명, 역할극 카드');
+/* 각 유형의 [기술형, 놀이형, 시스템형] 배정 */
+const ARCH_OF = {hunger:['tech','play','system'],thirst:['tech','play','system'],hot:['tech','play','system'],cold:['system','tech','play'],forget:['tech','play','system'],
+  mess:['tech','play','system'],safety:['tech','play','system'],sleep:['tech','play','system'],lonely:['tech','play','system'],study:['tech','play','system'],
+  relation:['tech','play','system'],smudge:['tech','system','play'],exercise:['system','tech','play'],phone:['play','tech','system'],picky:['play','tech','system'],
+  mind:['play','tech','system'],family:['tech','play','system'],generic:['play','play','system']};
+Object.entries(ARCH_OF).forEach(([k,a])=>{ if(LIB[k]) LIB[k].concepts.forEach((c,i)=>{ c.arch=a[i]; }); });
 
-      // 2. 대기 화면 끄고 실제 노트 양식 켜기
-      document.getElementById('waitScreen').style.display = 'none';
-      document.getElementById('notePreviewScreen').style.display = 'block';
-      
-      // 방문객이 입력한 글씨를 왼쪽 캔버스에 즉시 반영
-      document.getElementById('previewProblem').innerText = "「" + problemText + "」";
-      document.getElementById('previewProblem').style.color = "#e74c3c"; // 강조색
+/* =====================================================================
+   아이디어 발상 엔진 — 발상 도구(생체 모방·강제 결합·다른 분야 빌려 오기·에너지 바꾸기·거꾸로·역할 나누기·환경 바꾸기·게임화·이야기 입히기)
+   × 무작위 발상 재료 × 문제 목표를 조합해, 누를 때마다 새로운 발명품 3개(기술·놀이·시스템)를 만든다
+   ===================================================================== */
+const BIO = [
+  {n:'해바라기',f:'해를 따라 고개를 돌리는',h:'해를 따라 고개를 돌리듯',k:'해 따라가기'},
+  {n:'흰개미 집',f:'바람길을 만들어 저절로 시원해지는',h:'바람길을 만들듯',k:'바람길'},
+  {n:'펭귄',f:'서로 모여 체온을 나누는',h:'서로 모여 온기를 나누듯',k:'모여서 나누기'},
+  {n:'카멜레온',f:'상황에 따라 색을 바꾸는',h:'색을 바꾸듯',k:'색 바꾸기'},
+  {n:'문어',f:'여러 팔로 한꺼번에 일하는',h:'여러 팔을 한꺼번에 쓰듯',k:'여러 팔'},
+  {n:'연잎',f:'물방울과 먼지를 또르르 튕겨 내는',h:'먼지를 튕겨 내듯',k:'튕겨 내기'},
+  {n:'박쥐',f:'소리로 주변을 알아차리는',h:'소리로 주변을 살피듯',k:'소리 탐지'},
+  {n:'반딧불이',f:'스스로 빛을 내는',h:'스스로 빛을 내듯',k:'스스로 빛나기'},
+  {n:'코끼리',f:'큰 귀를 펄럭여 열을 식히는',h:'큰 귀를 펄럭이듯',k:'귀 펄럭이기'},
+  {n:'다람쥐',f:'미리 모아 두고 필요할 때 꺼내 쓰는',h:'미리 모아 두듯',k:'미리 모으기'},
+  {n:'솔방울',f:'날씨에 따라 저절로 열리고 닫히는',h:'날씨 따라 열리고 닫히듯',k:'저절로 열고 닫기'},
+  {n:'개미',f:'길에 표시를 남겨 함께 찾아가는',h:'길에 표시를 남기듯',k:'길 표시'},
+  {n:'선인장',f:'물을 몸속에 오래 저장하는',h:'물을 저장하듯',k:'저장하기'},
+  {n:'고슴도치',f:'위험할 때 몸을 동그랗게 말아 지키는',h:'몸을 말아 지키듯',k:'말아서 지키기'},
+  {n:'돌고래',f:'신호를 주고받으며 함께 움직이는',h:'신호를 주고받듯',k:'신호 주고받기'},
+  {n:'거미',f:'가벼운 줄로 튼튼하게 붙잡는',h:'가벼운 줄로 붙잡듯',k:'붙잡기'}
+];
+const THING = [
+  {n:'우산',f:'펼치고 접을 수 있는',h:'우산처럼 활짝 펼쳐져서',shape:'lamp'},
+  {n:'자판기',f:'버튼 하나로 필요한 것이 나오는',h:'자판기처럼 버튼 하나로',shape:'dispenser'},
+  {n:'롤러코스터',f:'레일을 따라 신나게 달리는',h:'롤러코스터처럼 레일을 따라 움직여서',shape:'ball'},
+  {n:'비눗방울',f:'가볍게 떠올라 감싸는',h:'비눗방울처럼 동그랗게 감싸서',shape:'cup'},
+  {n:'팽이',f:'돌면서 균형을 잡는',h:'팽이처럼 빙글빙글 돌면서',shape:'ball'},
+  {n:'트램펄린',f:'누르면 통통 튕겨 올리는',h:'트램펄린처럼 통통 튕겨서',shape:'sofa'},
+  {n:'우편함',f:'넣고 꺼내며 소식을 전하는',h:'우편함처럼 소식을 모아 전해서',shape:'box'},
+  {n:'모래시계',f:'뒤집으면 시간이 흐르는',h:'모래시계처럼 뒤집으면 시작돼서',shape:'cup'},
+  {n:'망원경',f:'멀리 있는 것을 가깝게 보여 주는',h:'망원경처럼 멀리서도 미리 보여 줘서',shape:'pole'},
+  {n:'회전 초밥 벨트',f:'빙글빙글 돌며 차례로 가져다주는',h:'회전 초밥처럼 차례로 가져다줘서',shape:'dispenser'},
+  {n:'나침반',f:'늘 방향을 알려 주는',h:'나침반처럼 갈 방향을 알려 줘서',shape:'band'},
+  {n:'시소',f:'한쪽이 내려가면 다른 쪽이 올라가는',h:'시소처럼 서로 균형을 맞춰서',shape:'sofa'},
+  {n:'요요',f:'던지면 다시 돌아오는',h:'요요처럼 다시 제자리로 돌아와서',shape:'ball'},
+  {n:'풍선',f:'불면 부풀어 가볍게 뜨는',h:'풍선처럼 부풀어 올라서',shape:'ball'}
+];
+const ENERGY = [
+  {n:'햇빛',h:'햇빛을 모아 전기로 바꿔서'},{n:'바람',h:'바람을 받아 날개를 돌려서'},
+  {n:'발걸음',h:'사람들이 밟고 지나갈 때 생기는 힘을 모아서'},{n:'빗물',h:'빗물이 흐르는 힘을 모아서'},{n:'손 흔들기',h:'손으로 흔드는 힘을 모아서'}
+];
+const FIELD = [
+  {n:'놀이공원',m:'번호표와 퍼레이드',shape:'station'},{n:'우주선',m:'카운트다운과 미션 보고',shape:'robot'},
+  {n:'요리 교실',m:'레시피 카드 순서',shape:'box'},{n:'축구 경기',m:'득점판과 응원가',shape:'station'},
+  {n:'마술쇼',m:'짠! 하고 나타나는 깜짝 공개',shape:'box'},{n:'소방 훈련',m:'출동 벨과 역할 분담',shape:'lamp'},
+  {n:'캠핑',m:'모닥불에 둘러앉는 이야기 시간',shape:'lamp'},{n:'보물 탐험',m:'지도와 단서 찾기',shape:'box'}
+];
+const GOAL = {
+ hot:['더위가 싹 가시도록','더위가 싹 가시고 시원해져요','시원','시원함 지키기'],
+ cold:['몸이 포근하게 데워지도록','추위가 물러가고 포근해져요','포근','따뜻함 지키기'],
+ hunger:['{T가} 제때 배부르게 먹도록','{T가} 배고프지 않게 제때 먹어요','냠냠','밥 챙기기'],
+ thirst:['물이 늘 넉넉하도록','물이 떨어지지 않고 늘 촉촉해요','촉촉','물 챙기기'],
+ forget:['챙길 것을 잊지 않도록','빠뜨리는 것 없이 모두 챙겨요','깜빡 방지','준비물 챙기기'],
+ mess:['주변이 늘 깔끔하도록','주변이 금세 깔끔해져요','깔끔','정리하기'],
+ safety:['다칠 일 없이 안전하도록','위험한 순간을 피하고 안전해요','안전','안전 살피기'],
+ sleep:['푹 자고 개운하게 일어나도록','푹 자고 개운하게 일어나요','꿀잠','잠자리 준비'],
+ lonely:['혼자여도 외롭지 않도록','외로움이 사라지고 즐거워져요','단짝','함께 놀기'],
+ smudge:['{O가} 늘 깨끗하도록','{O가} 반짝반짝 깨끗해져요','반짝','화면 닦기'],
+ exercise:['몸을 즐겁게 움직이도록','어느새 몸을 신나게 움직이고 있어요','신나는 운동','함께 운동하기'],
+ phone:['폰을 알맞게 쓰도록','폰을 약속한 만큼만 쓰게 돼요','폰 쉼표','폰 쉬게 하기'],
+ picky:['골고루 맛있게 먹도록','새 음식도 한 입씩 도전해요','골고루','새 음식 도전'],
+ study:['끝까지 집중하도록','딴생각 없이 끝까지 집중해요','집중','집중 지키기'],
+ relation:['서로 존중하는 말이 오가도록','놀림 대신 존중하는 말이 오가요','존중','존중하는 말 쓰기'],
+ mind:['떨리는 마음이 차분해지도록','떨리던 마음이 차분해져요','두근 진정','마음 돌보기'],
+ family:['가족이 웃으며 대화하도록','다툼 대신 웃음과 대화가 늘어요','가족 웃음','가족 대화 시간'],
+ generic:['‘{P}’ 문제가 풀리도록','‘{P}’ 문제가 시원하게 풀려요','해결','문제 해결']
+};
+const TPL = {
+ tech:[
+  {tool:'생체 모방 · {B}',shape:'robot',kind:'생체 모방 로봇형',name:'{B} 원리 {N} 로봇',line:'{B}처럼 {Bf} 원리를 빌려 와서, 스스로 움직이며 {G} 도와줘요',
+   parts:[['{N} 표정 화면','지금 상태를 표정으로 알려 줘요'],['{B} 감지 안테나','{B}처럼 주변 변화를 알아채요'],['{B} 원리 팔','{Bh} 움직여 해결해요'],['이동 바퀴','필요한 곳으로 달려가요']],
+   steps:['‘{P}’ 순간을 안테나가 알아채요','{Bh} 로봇 팔이 움직여요','{D}'],tech:'생체 모방 기법 ({B}의 ‘{Bk}’ 빌려 오기)',effect:'자연이 오랫동안 다듬어 온 방법을 빌려 와 적은 힘으로도 효과가 커요.',spec:'높이 40 cm · 모터, 센서, 재활용 플라스틱'},
+  {tool:'에너지 바꾸기 · {E}',shape:'pole',kind:'자급자족 에너지형',name:'{E} 발전 {N} 타워',line:'{Eh} 스스로 움직이는 장치예요. 전기 걱정 없이 {G} 도와줘요',
+   parts:[['{E} 수집 머리','{E}의 힘을 모아요'],['{N} 조절판','세기와 시간을 정해요'],['해결 작동부','모은 힘으로 문제를 해결해요'],['에너지 저장 받침','남은 힘을 모아 둬요']],
+   steps:['{E}의 힘을 머리 부분에 모아요','모은 힘이 작동부를 움직여요','{D}'],tech:'에너지 바꾸기 기법 ({E} → 해결하는 힘)',effect:'전기를 따로 쓰지 않아 환경에도 좋고 언제든 쓸 수 있어요.',spec:'높이 70 cm · 소형 발전기, 배터리'},
+  {tool:'생체 모방 · {B}',shape:'band',kind:'몸에 착용형',name:'{B} 원리 {N} 밴드',line:'몸에 차고 다니면 {B}처럼 {Bf} 원리로 어디서든 {G} 도와줘요',
+   parts:[['{N} 상태 화면','지금 상태를 보여 줘요'],['작동 버튼','필요할 때 눌러요'],['{B} 원리 밴드','{Bh} 몸을 도와요'],['충전 배터리','하루 종일 써요']],
+   steps:['밴드를 손목이나 목에 차요','버튼을 누르면 {Bh} 작동해요','{D}'],tech:'생체 모방 + 작게 하기 기법',effect:'늘 몸에 있으니 어디서든 바로 해결할 수 있어요.',spec:'둘레 20 cm · 실리콘, 작은 모터, 배터리'},
+  {tool:'색 바꾸기 · 카멜레온 신호',shape:'lamp',kind:'빛 신호형',name:'{N} 무지개 신호 등불',line:'문제가 커지기 전에 색이 초록→노랑→빨강으로 바뀌어, 말하지 않아도 모두가 보고 {G} 함께 움직이게 해요',
+   parts:[['무지개 전등갓','상태에 따라 색이 바뀌어요'],['살필 것 고르기 버튼','무엇을 지켜볼지 정해요'],['신호 불빛','멀리서도 잘 보여요'],['받침대','잘 보이는 곳에 둬요']],
+   steps:['등불이 ‘{P}’ 신호를 지켜봐요','노란불이 되면 미리 준비해요','{D}'],tech:'색 바꾸기 기법 (상태 → 색깔 신호)',effect:'문제가 커지기 전에 모두가 알아차려 미리 막을 수 있어요.',spec:'높이 35 cm · RGB LED, 센서'}
+ ],
+ play:[
+  {tool:'게임화 · {B} 카드 수집',shape:'box',kind:'퀘스트 놀이형',name:'{N} 퀘스트 보물상자',line:'‘{P}’ 문제를 푸는 작은 퀘스트를 깰 때마다 {B} 캐릭터 카드가 하나씩 나와요. 다 모으면 전설의 {N} 배지!',
+   parts:[['보물 뚜껑','퀘스트를 깨면 열려요'],['퀘스트 진행등','몇 개를 깼는지 보여 줘요'],['{B} 카드 칸','캐릭터 카드가 들어 있어요'],['튼튼한 바닥','잘 보이는 곳에 둬요']],
+   steps:['오늘의 퀘스트 카드를 뽑아요','퀘스트를 해내면 {B} 카드가 나와요','{D}'],tech:'게임화 기법 (해결 → 퀘스트와 수집)',effect:'해결하는 과정이 모으는 재미가 되어 스스로 계속하게 돼요.',spec:'가로 30 × 세로 20 × 높이 20 cm · 나무, LED, 카드'},
+  {tool:'이야기 입히기 · {B} 요정',shape:'robot',kind:'이야기꾼 캐릭터형',name:'{B} 요정 이야기꾼 봇',line:'{B} 요정이 주인공인 모험 이야기를 들려주고, 이야기 속 미션을 따라 하다 보면 {G} 저절로 도와줘요',
+   parts:[['요정 표정 화면','{B} 요정이 이야기를 해요'],['귀 쫑긋 안테나','내 대답을 알아들어요'],['미션 카드 팔','이야기 속 미션 카드를 건네요'],['바퀴','이야기 무대로 따라와요']],
+   steps:['{B} 요정이 모험 이야기를 시작해요','이야기 속 미션을 함께 해내요','{D}'],tech:'이야기 입히기 기법 (해결 → 모험 이야기)',effect:'딱딱한 해결 방법이 신나는 이야기가 되어 오래 기억해요.',spec:'높이 30 cm · 스피커, 화면, 바퀴'},
+  {tool:'협동 게임',shape:'station',kind:'협동 점수형',name:'우리 모두 {N} 협동 점수판',line:'다 같이 ‘{K}’{K를} 해낼 때마다 모두의 점수가 올라가고, 목표를 채우면 함께 축하 파티를 열어요',
+   parts:[['응원 카메라','함께한 순간을 찍어요'],['협동 점수 화면','모두의 점수를 보여 줘요'],['하이파이브 버튼','해냈을 때 함께 눌러요'],['받침대','모두 볼 수 있는 곳에 둬요']],
+   steps:['오늘의 협동 목표를 정해요','함께 해낼 때마다 하이파이브 버튼을 눌러요','{D}'],tech:'협동 게임 기법 (혼자 → 모두의 점수)',effect:'서로 응원하며 함께 해결해서 끝까지 포기하지 않아요.',spec:'가로 40 × 세로 15 × 높이 35 cm · 화면, 카메라'},
+  {tool:'다른 분야 빌려 오기 · {F}',shape:'{Fs}',kind:'분야 빌려 오기형',name:'{F} 방식 {N} 놀이 키트',line:'{F}의 ‘{Fm}’{Fm을} 빌려 와서, {G} 모두가 함께하는 신나는 놀이로 바꿔요',
+   parts:[['{F} 신호부','놀이 시작을 알려요'],['진행 표시부','얼마나 해냈는지 보여 줘요'],['놀이 도구 칸','놀이에 쓸 도구가 들어 있어요'],['받침','어디든 둘 수 있어요']],
+   steps:['{F}처럼 "시작!" 신호로 놀이를 열어요','‘{Fm}’ 방식대로 모두 함께 움직여요','{D}'],tech:'다른 분야 빌려 오기 기법 ({F} → 우리 문제)',effect:'익숙하고 신나는 방식이라 누구나 쉽게 참여해요.',spec:'놀이 키트 한 세트 · 종이, 나무, LED'}
+ ],
+ system:[
+  {tool:'강제 결합 · {X}',shape:'{Xs}',kind:'엉뚱 결합형',name:'{X} 합체 {N} 장치',line:'{X}{X와} 합체! ‘{P}’ 순간에 {Xh} {G} 도와줘요',
+   parts:[['{X} 부분','{Xf} 모양을 그대로 살려요'],['합체 조절부','언제 작동할지 정해요'],['해결 장치부','{G} 움직여요'],['튼튼한 받침','어디든 둘 수 있어요']],
+   steps:['{X}의 장점을 떠올리며 장치를 설치해요','‘{P}’ 순간이 오면 {Xh} 작동해요','{D}'],tech:'강제 결합 기법 ({X} + 해결 장치)',effect:'상관없어 보이는 물건의 장점을 빌려 와 새로운 해결법이 생겨요.',spec:'크기 조절 가능 · 재활용 재료, 작은 모터'},
+  {tool:'거꾸로 생각하기',shape:'box',kind:'거꾸로 발상형',name:'거꾸로 {N} 스위치 상자',line:'‘{P}’ 일을 억지로 막는 대신 거꾸로 이용해요. 그 일이 생길 때마다 스위치가 눌려 {G} 돕는 좋은 일이 하나씩 일어나요',
+   parts:[['거꾸로 지붕','문제 순간을 신호로 받아요'],['좋은 일 표시등','일어난 좋은 일을 세어요'],['깜짝 선물 서랍','해결을 돕는 선물이 튀어나와요'],['바닥 스위치','문제 순간에 눌려요']],
+   steps:['‘{P}’ 순간이 오면 스위치가 눌려요','상자에서 해결을 돕는 깜짝 선물이 나와요','{D}'],tech:'거꾸로 하기 기법 (문제 순간 → 좋은 일의 신호)',effect:'싫던 순간이 기다려지는 순간으로 바뀌어 마음까지 가벼워져요.',spec:'가로 30 × 세로 25 × 높이 20 cm · 나무, 스위치, LED'},
+  {tool:'역할 나누기 · 꿀벌 팀',shape:'lamp',kind:'규칙 바꾸기형',name:'꿀벌 팀 {N} 당번 등불',line:'혼자 애쓰는 대신 꿀벌처럼 역할을 나눠요. 당번 등불이 켜진 사람이 차례로 ‘{K}’{K를} 맡아 모두 함께 해결해요',
+   parts:[['당번 전등갓','이번 차례를 비춰요'],['차례 버튼','다음 당번으로 넘겨요'],['역할 불빛','맡은 역할을 색으로 알려요'],['받침대','모두 보이는 곳에 둬요']],
+   steps:['함께 역할과 순서를 정해요','불이 켜진 당번이 ‘{K}’{K를} 맡아요','{D}'],tech:'역할 나누기 기법 (혼자 → 모두의 약속)',effect:'한 사람에게 짐이 몰리지 않고 모두의 일이 되어 오래 지켜져요.',spec:'높이 35 cm · LED, 버튼'},
+  {tool:'환경 바꾸기 · {B}',shape:'box',kind:'환경 바꾸기형',name:'{B} 원리 {PL} 리모델링',line:'사람을 바꾸는 대신 {PL}{PL를} 바꿔요. {B}처럼 {Bf} 원리로 구조를 고쳐서 {G} 해요',
+   parts:[['{B} 원리 지붕','{Bh} 공간을 바꿔요'],['변화 표시등','얼마나 좋아졌는지 보여 줘요'],['구조 바꾸기 벽','자리·통로·모양을 바꿔요'],['튼튼한 바닥','공간 전체를 받쳐요']],
+   steps:['{PL}에서 문제가 생기는 곳을 찾아요','{B}처럼 {Bh} 구조를 바꿔요','{D}'],tech:'환경 바꾸기 + 생체 모방 기법',effect:'사람이 애쓰지 않아도 공간이 저절로 문제를 막아 줘요.',spec:'공간 맞춤 크기 · 재활용 재료, 가벼운 판'}
+ ]
+};
+const pickR = a => a[Math.floor(Math.random()*a.length)];
+function placeOf(conf, q){
+  if(conf.obj) return conf.obj;
+  const m = (conf.sit||'').match(/교실|급식실|운동장|학교|거실|부엌|집|방|현관|화장실|복도|놀이터/);
+  if(m) return m[0];
+  if(q.A && !/친구|부모|엄마|아빠|사람|나$/.test(q.A)) return q.A;
+  return '생활 공간';
+}
 
-      // 3. 3초 뒤에 레이저 끄고 '진짜 이미지' 띄우기 (마술 같은 연출)
-      setTimeout(() => {
-        document.getElementById('scannerLine').style.display = 'none';
-        document.getElementById('placeholderText').style.display = 'none';
-        document.getElementById('generatedImage').style.display = 'block'; // 실제 이미지 등장!
-        
-        // 텍스트 상태 업데이트
-        document.getElementById('headerStatus').innerHTML = "✨ 발명 노트 완성!";
-        document.getElementById('headerStatus').style.color = "#2c3e50";
-        document.getElementById('previewAssist').innerText = "입력하신 문제에 완벽하게 대응하는 솔루션이 스케치되었습니다.";
-        document.getElementById('previewAssist').style.color = "#2c3e50";
-        document.getElementById('previewFeature').innerText = "출력된 인쇄물에서 세부 원리를 확인하세요!";
-        document.getElementById('previewFeature').style.color = "#2c3e50";
-      }, 3000); // 3초 (3000ms)
+/* 문제 유형별 '문제 맞춤' 아이디어 씨앗 — [아키텍처, 모양, 발상 도구, 이름, 해결 문장, 핵심 동작, 대상(생략=모두)] */
+const SEEDS = {
+ hot:[
+  ['tech','box','기화열 원리','물방울 증발 쿨링 커튼','젖은 천 커튼 사이로 바람이 지나가면 물이 마르며 열을 빼앗아, 전기 에어컨 없이 공기를 식혀요','물통이 커튼을 촉촉하게 적셔요'],
+  ['tech','pole','생체 모방 · 코끼리 귀','코끼리 귀 펄럭 부채봇','코끼리가 큰 귀를 펄럭여 열을 식히듯, 커다란 날개가 천천히 펄럭여 조용하고 부드러운 바람을 만들어요','큰 날개가 천천히 펄럭여요'],
+  ['play','ball','게임화 · 퀴즈','더위 몬스터 미스트 퀴즈볼','더위 몬스터 퀴즈를 맞히면 시원한 미스트를 한 번 뿜을 수 있어서, 물 마시기와 쉬는 법을 놀이로 익혀요','퀴즈를 맞히면 미스트가 나와요'],
+  ['play','band','탐정 놀이','시원한 비밀 장소 탐정 팔찌','팔찌로 곳곳의 온도를 재며 가장 시원한 "비밀 장소"와 시간을 찾아내는 탐정 놀이예요','가장 시원한 장소를 찾아요'],
+  ['system','box','생체 모방 · 흰개미 집','흰개미 바람길 창문 키트','흰개미 집처럼 아래 창으로 찬 공기가 들어오고 위 창으로 더운 공기가 빠지게 창 여는 방법을 바꿔요','아래 창과 위 창을 함께 열어요'],
+  ['system','lamp','규칙 바꾸기','더위 시간표 신호등','가장 더운 시간엔 그늘·실내 활동, 시원한 시간엔 바깥 활동을 하도록 하루 시간표를 신호등 색으로 바꿔요','신호등 색에 맞춰 활동을 바꿔요']],
+ cold:[
+  ['tech','band','생체 모방 · 펭귄 깃털','펭귄 깃털 공기층 조끼','펭귄 깃털처럼 작은 공기 주머니가 여러 겹 있어 몸의 열을 가둬, 얇지만 포근해요','공기 주머니를 부풀려요'],
+  ['tech','lamp','생체 모방 · 해바라기','해바라기 햇빛 모음 거울','해바라기처럼 해를 따라 거울 날개가 돌며 햇빛을 방 안으로 모아 따뜻하게 해요','거울 날개가 해를 따라 돌아요'],
+  ['play','sofa','몸 놀이 · 펭귄 허들','펭귄 허들 체조 매트','펭귄처럼 모여 서서 자리를 바꾸는 체조 놀이를 하면 몸이 금세 데워져요','펭귄처럼 모여 자리를 바꿔요'],
+  ['system','box','환경 바꾸기','문틈 바람 막는 뱀 쿠션 길','문과 창문 틈마다 긴 뱀 모양 쿠션을 놓아 찬바람 길을 막아요. 전기 없이도 방이 덜 추워요','틈마다 뱀 쿠션을 놓아요'],
+  ['system','station','함께하기','따뜻한 자리 나눔 지도','가장 따뜻한 자리를 지도로 표시하고 돌아가며 앉는 약속을 해요','따뜻한 자리를 번갈아 써요']],
+ hunger:[
+  ['tech','dispenser','생체 모방 · 다람쥐','다람쥐 도토리 저금통 급식기','다람쥐가 먹이를 미리 모아 두듯 칸마다 한 끼씩 넣어 두면, 하루 동안 한 칸씩 돌아가며 열려요','칸이 하나씩 돌아가며 열려요','a'],
+  ['tech','station','소리 연결','목소리 부르면 나오는 간식벨','보호자가 녹음한 목소리가 나오면 {T가} 벨을 코로 눌러 간식을 받는 소통 장치예요','{T가} 코로 벨을 눌러요','a'],
+  ['play','sofa','냄새 놀이','킁킁 노즈워크 보물 매트','매트의 천 사이에 사료를 숨겨 두면 {T가} 냄새로 찾아 먹으며 혼자서도 시간 가는 줄 몰라요','{T가} 냄새로 사료를 찾아요','a'],
+  ['system','station','이웃 돌봄','이웃 반려 돌봄 품앗이 달력','가까운 이웃끼리 서로의 반려동물 밥을 챙겨 주는 날을 정해, 늦게 오는 날에도 누군가 밥을 챙겨요','이웃과 돌봄 날짜를 정해요','a'],
+  ['tech','dispenser','시간 신호','배꼽시계 간식 신호 가방','배고픈 시간이 되면 가방 불빛이 켜져 챙겨 온 간식을 잊지 않고 먹게 해요','가방 불빛이 켜져요','h'],
+  ['play','box','게임화','무지개 한 끼 퍼즐 식판','식판 칸마다 색깔 음식을 채우면 무지개 퍼즐이 완성돼요','색깔 칸을 채워요','h'],
+  ['system','box','규칙 바꾸기','가족 식사 시간 약속판','가족이 함께 밥 먹는 시간을 정해 두고 거르지 않도록 서로 불러 줘요','밥 시간에 서로 불러 줘요','h']],
+ thirst:[
+  ['tech','cup','생체 모방 · 선인장','선인장 저수 심지 화분','선인장처럼 화분 아래 칸에 물을 저장해 두면, 흙이 마를 때 심지가 조금씩 물을 빨아올려요','심지가 물을 빨아올려요','p'],
+  ['tech','dispenser','소리 신호','꼬르륵 알림 물그릇','물이 바닥에 가까워지면 물그릇이 "꼬르륵" 소리를 내서 가족 누구나 바로 채울 수 있어요','물이 줄면 꼬르륵 소리가 나요','a'],
+  ['tech','band','기록','꿀꺽 물 마시기 컵홀더','물을 마실 때마다 컵홀더 불빛이 하나씩 켜져 오늘 마신 양이 한눈에 보여요','마실 때마다 불빛이 켜져요','h'],
+  ['play','cup','색 바꾸기 놀이','마시면 꽃 피는 물병','물을 마실수록 물병 속 종이꽃이 한 잎씩 피어나서 꽃을 다 피우고 싶어져요','마신 만큼 꽃잎이 피어요','h'],
+  ['play','box','돌봄 놀이','식물 표정 카드 일기','흙을 만져 본 뒤 화분에 웃는·목마른 표정 카드를 바꿔 꽂는 돌봄 놀이예요','흙을 만지고 표정을 바꿔요','p'],
+  ['system','lamp','역할 나누기','우리 집 물 당번 등불','가족이 요일마다 물 당번을 맡고, 당번 등불이 켜진 사람이 물을 채워요','당번이 물을 채워요'],
+  ['system','box','환경 바꾸기','길목 물병 선반','자주 지나가는 길목에 물병 선반을 두어 지나갈 때마다 저절로 물을 마시게 해요','길목 선반에서 물을 마셔요','h']],
+ forget:[
+  ['tech','band','생체 모방 · 개미','개미 길 불빛 챙김 줄','개미가 길에 표시를 남기듯, 현관까지 가는 길에 준비물 불빛 점을 차례로 밝혀 줘요','불빛 점을 따라 챙겨요'],
+  ['tech','box','무게 감지','가방 무게 저울 문고리','문고리에 가방을 걸면 무게로 준비물이 다 들었는지 알려 줘요','문고리에 가방을 걸어요'],
+  ['play','box','카드 게임','준비물 짝 맞추기 카드','요일 카드와 준비물 카드를 짝 맞추는 게임을 전날 밤 하면서 저절로 챙길 것을 기억해요','카드 짝을 맞춰요'],
+  ['system','station','함께하기','짝꿍 챙김 확인 약속','친구와 짝꿍이 되어 등교 전 서로 준비물을 확인해 주는 반 약속이에요','짝꿍과 서로 확인해요'],
+  ['system','box','거꾸로 발상','전날 밤 내일 상자','아침에 챙기는 대신 전날 밤 "내일 상자"에 모두 넣고 상자째 들고 나가요','전날 밤 상자에 넣어요']],
+ mess:[
+  ['tech','robot','생체 모방 · 문어','문어 팔 정리 로봇','문어처럼 여러 팔로 한꺼번에 물건을 집어 제자리 칸에 넣어요','여러 팔로 한꺼번에 집어요'],
+  ['tech','box','자석 원리','자석 제자리 책상','물건마다 작은 자석을 붙이면 책상 위 제자리에 "착" 붙어서 흩어지지 않아요','물건이 제자리에 착 붙어요'],
+  ['play','ball','게임화','3분 어지름 몬스터 사냥','정리 음악이 나오는 3분 동안 "어지름 몬스터"를 치우며 사냥하는 게임이에요','몬스터를 치워요'],
+  ['system','station','환경 바꾸기','물건 집 주소 스티커','모든 물건에 집 주소 스티커와 같은 색 자리를 만들어 누구나 제자리를 한눈에 알아요','같은 색 자리에 둬요']],
+ safety:[
+  ['tech','pole','생체 모방 · 박쥐','박쥐 소리 장애물 지팡이','박쥐가 소리로 주변을 알아차리듯, 앞의 장애물을 소리로 찾아 손잡이 진동으로 알려 줘요','장애물을 진동으로 알려요'],
+  ['tech','lamp','생체 모방 · 반딧불이','반딧불이 발밑 자동 등','밤에 발을 내딛으면 반딧불이처럼 발밑이 은은하게 밝아져 넘어지지 않아요','발을 내딛으면 불이 켜져요'],
+  ['play','station','역할극 놀이','위험 탈출 롤플레이 게임판','위험 상황 카드를 뽑아 친구와 역할극으로 탈출 방법을 연습하는 보드게임이에요','상황 카드로 연습해요'],
+  ['system','station','공동체 약속','우리 동네 도움 가게 지도','가게·이웃과 "도움 요청 장소"를 정해 지도에 표시하고, 위험할 때 바로 들어갈 수 있게 해요','도움 장소를 함께 정해요']],
+ sleep:[
+  ['tech','lamp','빛 조절','노을빛 잠 신호 조명','잘 시간이 다가오면 조명이 노을처럼 점점 주황빛으로 어두워져 몸이 잘 준비를 해요','빛이 노을처럼 어두워져요'],
+  ['tech','band','진동 박자','파도 박자 꿀잠 밴드','느린 파도 박자로 살살 진동해 숨을 고르며 잠들게 도와요','느린 박자로 진동해요'],
+  ['play','robot','이야기 입히기','잠 요정 뒷이야기 봇','잠자리에 누우면 잠 요정이 짧은 이야기를 들려주고 "뒷이야기는 꿈에서!" 하며 불을 꺼요','이야기가 끝나면 불이 꺼져요'],
+  ['system','box','환경 바꾸기','폰 밖에서 재우기 침실 규칙함','잠자리에 들기 전 폰과 게임기를 방 밖 상자에 재워 두는 가족 규칙이에요','폰을 방 밖에 재워요']],
+ lonely:[
+  ['tech','robot','생체 모방 · 돌고래','돌고래 신호 친구 로봇','돌고래처럼 소리 신호를 주고받으며, 말을 걸면 대답하고 함께 노래를 불러요','소리 신호를 주고받아요'],
+  ['play','box','편지 놀이','비밀 친구 응원 우체통','비밀 친구를 정해 일주일 동안 몰래 응원 편지를 주고받는 놀이예요','몰래 응원 편지를 넣어요','h'],
+  ['system','sofa','함께하기','함께 놀자 벤치','"함께 놀자" 벤치에 앉으면 친구들이 보고 같이 놀자고 다가오는 약속이에요','벤치에 앉아 신호를 보내요','h'],
+  ['play','ball','냄새 놀이','보호자 냄새 담요볼','보호자 냄새가 밴 천으로 감싼 공이라 {T가} 안고 굴리며 덜 외로워해요','냄새 담요볼을 안고 놀아요','a'],
+  ['system','station','이웃 돌봄','반려동물 놀이 친구 교환 달력','이웃 반려동물끼리 함께 노는 날을 정해 혼자 있는 시간을 줄여요','놀이 친구 날을 정해요','a']],
+ smudge:[
+  ['tech','phone','생체 모방 · 연잎','연잎 돌기 지문 튕김 필름','연잎처럼 아주 작은 돌기가 있는 필름이라 손 기름과 먼지가 달라붙지 않고 또르르 튕겨 나가요','지문이 붙지 않고 튕겨 나가요'],
+  ['tech','box','자동 세척','뚜껑 닫으면 닦이는 세척함','{O를} 넣고 뚜껑을 닫으면 양쪽 극세사 솔이 쓱쓱 지나가며 얼룩을 닦아 줘요','뚜껑을 닫으면 솔이 지나가요'],
+  ['play','ball','게임화','반짝 도장 7일 챌린지','화면을 닦을 때마다 반짝 도장을 찍어 한 주에 7개를 모으는 챌린지예요','닦고 도장을 찍어요'],
+  ['system','band','습관 바꾸기','손 먼저 닦기 물티슈 링','폰을 잡기 전 손을 닦는 습관을 링 속 물티슈로 쉽게 만들어, 얼룩이 처음부터 안 생기게 해요','폰 잡기 전 손을 닦아요']],
+ exercise:[
+  ['tech','shoe','에너지 바꾸기','걸으면 충전되는 운동화','걸을수록 신발 속 발전기가 휴대폰 배터리를 충전해 줘서 걷고 싶은 이유가 생겨요','걸을수록 배터리가 차요'],
+  ['play','station','다른 분야 빌려 오기 · 여행','걸음 수 세계 여행 지도','걸은 만큼 화면 속 지도에서 세계 여러 나라를 여행하며 나라 도장을 모아요','걸은 만큼 지도에서 여행해요'],
+  ['system','box','환경 바꾸기','계단 피아노 건반 스티커','계단마다 건반 스티커를 붙여 밟으면 소리가 나서 엘리베이터 대신 계단이 놀이터가 돼요','계단 건반을 밟아요']],
+ phone:[
+  ['tech','box','시간 잠금','모래시계 폰 휴식 금고','약속 시간을 모래시계로 정하면 모래가 다 내려올 때까지 폰이 금고에서 쉬어요','모래가 내려오는 동안 폰이 쉬어요'],
+  ['play','dispenser','대체하기','폰 대신 놀이 뽑기 기계','폰을 넣으면 그 대신 보드게임·산책·그림 그리기 같은 놀이 캡슐이 나와요','폰 대신 놀이 캡슐이 나와요'],
+  ['system','lamp','규칙 바꾸기','폰 없는 저녁 가족 등불','등불이 켜진 저녁 시간엔 온 가족이 폰을 내려놓고 함께 이야기해요','등불이 켜지면 폰을 내려놓아요']],
+ picky:[
+  ['tech','dispenser','크기 바꾸기','채소 쪼꼬미 모양틀','싫어하는 채소를 별·하트 모양의 아주 작은 크기로 찍어 내 새 음식처럼 느끼게 해요','채소를 작은 모양으로 찍어요'],
+  ['play','station','게임화','맛 탐험가 여권','새 음식을 맛볼 때마다 여권에 나라 도장처럼 맛 도장을 찍어요','맛볼 때마다 도장을 찍어요'],
+  ['system','box','역할 바꾸기','꼬마 셰프 요리 당번','싫어하는 음식을 직접 요리하는 꼬마 셰프 당번을 맡아, 내가 만든 음식이라 먹어 보고 싶어져요','직접 요리하고 맛봐요']],
+ study:[
+  ['tech','band','소리 가림','집중 동굴 헤드밴드','주변 소리를 부드럽게 가려 주는 헤드밴드로, 쓰면 나만의 조용한 동굴이 생겨요','헤드밴드를 쓰면 조용해져요'],
+  ['play','robot','역할 바꾸기','내가 선생님 로봇 학생','배운 내용을 로봇 학생에게 가르쳐 주면 로봇이 질문을 던져, 가르치며 더 잘 기억해요','로봇 학생에게 가르쳐 줘요'],
+  ['system','box','쪼개기','25분 토마토 공부 상자','공부를 25분 조각으로 나눠 한 조각 끝날 때마다 토마토 칩을 모아요','25분마다 토마토 칩을 모아요']],
+ relation:[
+  ['tech','band','생체 모방 · 카멜레온','카멜레온 마음색 배지','기분에 따라 배지 색을 바꿔 달면 친구들이 내 마음을 알아보고 말을 조심해요','마음 색을 바꿔 달아요'],
+  ['play','station','게임화','존중 말 빙고 게임','"고마워·괜찮아·멋지다" 같은 존중 말을 쓸 때마다 반 빙고 칸을 채워요','존중 말을 쓰면 칸을 채워요'],
+  ['system','box','거꾸로 발상','놀림 말 재활용 공장','놀림 말 쪽지를 공장 상자에 넣으면 친구들과 함께 다정한 말로 "재활용"해 게시판에 붙여요','놀림 말을 다정한 말로 바꿔요']],
+ mind:[
+  ['tech','band','생체 모방 · 고슴도치','고슴도치 마음 방패 밴드','떨릴 때 밴드를 꼭 쥐면 말랑한 돌기가 손바닥을 눌러 주며 "괜찮아" 목소리가 나와요','밴드를 꼭 쥐어요'],
+  ['play','station','역할 바꾸기','인형 청중 연습 무대','좋아하는 인형들을 청중으로 앉혀 두고 연습하면 인형들이 박수를 쳐 줘요','인형 앞에서 연습해요'],
+  ['system','box','쪼개기','떨림 쪼개기 계단 카드','무서운 일을 아주 작은 단계 카드로 나눠 한 계단씩 도전하고 올라가요','한 계단씩 도전해요']],
+ family:[
+  ['tech','lamp','소리 신호','목소리 온도계 등불','목소리가 커지면 등불이 주황·빨강으로 바뀌어 가족 모두 목소리를 낮추게 도와요','목소리가 커지면 색이 바뀌어요'],
+  ['play','ball','게임화','가족 칭찬 릴레이 주사위','주사위를 굴려 나온 가족에게 칭찬 한마디씩 하는 저녁 놀이예요','주사위로 칭찬할 사람을 정해요'],
+  ['system','station','규칙 바꾸기','일주일 가족 회의 약속판','일주일에 한 번 가족 회의를 열어 서운한 점과 고마운 점을 차례로 말해요','가족 회의를 열어요']]
+};
+/* 사전에 유형이 없는 '불편' 별 씨앗 (젖음·냄새·시끄러움·무거움·고장·오래 걸림) */
+const SYM_SEEDS = {
+ '젖음':[
+  ['tech','cup','생체 모방 · 연잎','연잎 발수 코팅 스프레이','연잎처럼 물방울을 또르르 튕겨 내는 코팅을 {O}에 뿌려 두면 비가 와도 물이 스며들지 않아요','코팅을 미리 뿌려 두어요'],
+  ['tech','lamp','생체 모방 · 솔방울','솔방울 자동 펼침 덮개','솔방울이 날씨에 따라 열리고 닫히듯, 습기를 느끼면 덮개가 저절로 펼쳐져 {O를} 감싸요','습기를 느끼면 덮개가 펼쳐져요'],
+  ['play','ball','게임화','물웅덩이 징검다리 놀이','길 위 물웅덩이를 피해 징검다리 점수를 모으는 등굣길 놀이로, 조심해서 걷는 습관이 생겨요','물웅덩이를 피해 점수를 모아요'],
+  ['system','box','환경 바꾸기','현관 바람 건조 선반','현관에 바람이 잘 통하는 구멍 선반을 두어 젖은 {O를} 올려 두면 다음 날 아침까지 보송하게 말라요','젖은 {O를} 선반에 올려요'],
+  ['system','station','함께하기','비 오는 날 나눔 보관함','학교 현관에 여분 우산과 장화를 두고 비 오는 날 누구나 빌려 쓰는 나눔 약속이에요','필요할 때 빌리고 돌려줘요']],
+ '냄새가 남':[
+  ['tech','box','숯 원리','숯 탈취 캡슐 상자','숯이 냄새를 빨아들이는 원리로, 캡슐을 넣어 두면 {O} 냄새가 줄어요','숯 캡슐을 넣어 둬요'],
+  ['play','box','탐정 놀이','냄새 탐정 코 게임','냄새가 나는 곳을 찾아 원인을 적는 탐정 놀이로 진짜 원인을 없애요','냄새 원인을 찾아 적어요'],
+  ['system','lamp','규칙 바꾸기','하루 두 번 환기 신호등','정해진 시간에 신호등이 켜지면 창문을 열어 환기하는 약속이에요','신호등이 켜지면 창문을 열어요']],
+ '시끄러움':[
+  ['tech','lamp','소리 신호','소리 크기 신호등','소리가 커지면 신호등이 노랑·빨강으로 바뀌어 모두가 스스로 목소리를 낮춰요','소리가 커지면 색이 바뀌어요'],
+  ['tech','box','흡음 원리','달걀판 흡음 벽 패널','달걀판처럼 울퉁불퉁한 판이 소리를 흩어 줘서 울림이 줄어들어요','흡음 판을 벽에 붙여요'],
+  ['play','station','게임화','속삭임 챔피언 릴레이','가장 작은 목소리로 전달하는 속삭임 릴레이 게임으로 조용히 말하는 연습을 해요','속삭임으로 말을 전달해요'],
+  ['system','box','환경 바꾸기','조용 구역 깃발','공간을 "조용 구역"과 "말하기 구역"으로 나눠 깃발로 표시해요','구역을 깃발로 나눠요']],
+ '무거움':[
+  ['tech','robot','바퀴 달기','졸졸 따라오는 바퀴 가방 로봇','무거운 짐을 싣고 주인을 졸졸 따라오는 바퀴 가방 로봇이에요','가방이 졸졸 따라와요'],
+  ['tech','band','지렛대 원리','지렛대 손잡이 밴드','지렛대 원리 손잡이를 끼우면 같은 무게도 훨씬 가볍게 들 수 있어요','손잡이를 끼워 들어요'],
+  ['play','box','퍼즐 놀이','짐 나누기 무게 퍼즐','무거운 짐을 작은 가방 여러 개로 나눠 담는 무게 맞추기 퍼즐 놀이예요','무게를 맞춰 나눠 담아요'],
+  ['system','box','규칙 바꾸기','사물함 두고 다니기 약속','매일 들고 다니지 않아도 되는 책을 사물함에 두는 반 약속으로 짐을 줄여요','필요 없는 책은 사물함에 둬요']],
+ '고장·파손':[
+  ['tech','box','완충 원리','에어백 보호 케이스','떨어지는 순간 작은 공기 주머니가 부풀어 {O를} 지켜요','떨어지면 공기 주머니가 부풀어요'],
+  ['play','station','게임화','고장 탐정 수리 게임','고장 난 곳을 찾고 고치는 방법을 카드로 맞히며 배우는 놀이예요','고장 원인을 카드로 맞혀요'],
+  ['system','box','역할 나누기','우리 반 수리 당번 상자','수리 도구 상자를 두고 수리 당번이 간단한 고장을 바로 고쳐요','수리 당번이 바로 고쳐요']],
+ '시간이 오래 걸림':[
+  ['tech','dispenser','미리 하기','버튼 하나 준비 세트','전날 필요한 것을 한 세트로 묶어 두면 버튼 하나로 차례대로 꺼내 줘요','버튼을 누르면 차례대로 나와요'],
+  ['play','cup','게임화','모래시계 스피드 챌린지','모래시계가 다 떨어지기 전에 해내는 도전 놀이로 걸리는 시간을 줄여요','모래시계 안에 해내요'],
+  ['system','box','쪼개기','순서 카드 기차','할 일을 순서 카드로 나눠 기차처럼 이어 두면 헤매지 않아요','순서 카드를 따라가요']]
+};
+const SHAPE_PARTS = {
+ dispenser:[['저장 칸','넣어 둔 것을 보관해요'],['작동 화면','지금 상태를 보여 줘요'],['작동 장치','필요한 만큼 움직여요'],['받침 그릇','나온 것을 받아요']],
+ ball:[['여는 뚜껑','안에 넣고 열어요'],['조절 다이얼','세기를 정해요'],['말랑한 겉면','안전하게 감싸요'],['속 무게추','균형을 잡아요']],
+ station:[['살핌 카메라','상황을 살펴요'],['안내 화면','무엇을 할지 보여 줘요'],['옆 버튼·칸','누르거나 꺼내 써요'],['받침대','잘 보이는 곳에 세워요']],
+ robot:[['표정 화면','기분과 상태를 보여 줘요'],['감지 안테나','주변을 알아채요'],['도우미 팔','필요한 일을 해요'],['바퀴','필요한 곳으로 가요']],
+ pole:[['머리 장치','핵심 기능을 해요'],['조절판','세기와 시간을 정해요'],['옆 작동부','바람·빛·소리를 내보내요'],['무게 받침','넘어지지 않게 해요']],
+ lamp:[['전등갓','빛으로 알려요'],['조절 버튼','언제 켤지 정해요'],['신호 불빛','색과 밝기로 알려요'],['받침대','잘 보이는 곳에 둬요']],
+ band:[['상태 화면','지금 상태를 보여 줘요'],['작동 버튼','필요할 때 눌러요'],['편한 밴드','몸에 편하게 감싸요'],['배터리·칩','오래 쓸 수 있어요']],
+ box:[['여는 지붕','넣고 꺼내요'],['표시등','진행 상황을 보여 줘요'],['옆 칸','도구와 카드가 들어 있어요'],['튼튼한 바닥','어디든 둬요']],
+ cup:[['위 꼭지','물·재료가 나와요'],['안쪽 장치','원리대로 작동해요'],['옆면 창','남은 양을 보여 줘요'],['넓은 받침','쓰러지지 않아요']],
+ fridge:[['위 칸','넣어 둔 것을 보관해요'],['문 화면','상태를 보여 줘요'],['손잡이','여닫아요'],['아래 센서','움직임을 알아채요']],
+ sofa:[['등받이 화면','상태를 보여 줘요'],['저장 장치','힘이나 기록을 모아요'],['팔걸이','편하게 기대요'],['발판','밟거나 올라서요']],
+ shoe:[['발등 센서','걸음을 알아채요'],['작은 스피커','소리로 알려요'],['옆면 불빛','걸을 때 빛나요'],['쿠션 밑창','편하게 걸어요']],
+ phone:[['윗부분','카메라와 센서 자리'],['화면 필름','화면을 감싸 지켜요'],['옆 버튼','기능을 켜요'],['아랫부분','케이스를 단단히 잡아요']]
+};
+const ARCH_SETUP = {tech:'장치를 알맞은 곳에 설치해요',play:'함께 놀이 규칙을 정해요',system:'모두 함께 새 약속과 자리를 정해요'};
+const ARCH_EFFECT = {tech:'새로운 작동 원리 덕분에 힘들이지 않고 문제를 해결해요.',play:'해결이 즐거운 놀이가 되어 스스로 계속하게 돼요.',system:'사람과 공간의 약속을 바꿔서 문제가 다시 생기지 않아요.'};
+const SHAPE_SPEC = {dispenser:'가로 25 × 세로 20 × 높이 35 cm · 플라스틱, 모터',ball:'지름 15 cm · 실리콘, 작은 부품',station:'가로 30 × 세로 15 × 높이 30 cm · 화면, 버튼',robot:'높이 35 cm · 모터, 센서, 바퀴',pole:'높이 60 cm · 모터, 배터리',lamp:'높이 35 cm · LED, 버튼',band:'둘레 18 cm · 실리콘, 작은 전자 칩',box:'가로 30 × 세로 25 × 높이 25 cm · 나무, 종이, LED',cup:'지름 20 cm · 재활용 플라스틱',fridge:'문에 붙이는 장치 15 × 10 cm · 센서, 잠금',sofa:'가로 80 × 세로 50 cm · 천, 폼, 센서',shoe:'운동화 한 켤레 · 센서, 소형 발전기',phone:'휴대폰 크기 · 필름, 실리콘'};
+function seedToConcept(sd, type, T){
+  const [arch,shape,tool,name,line,act] = sd; const g = GOAL[type]||GOAL.generic;
+  const f = x=>fill(x,T);
+  return {arch, shape, tool, kind: ({tech:'스마트 기기형',play:'놀이·경험형',system:'역발상·시스템형'})[arch].replace('형','') + ' · ' + tool.split('·')[0].trim(),
+    name:f(name), line:f(line), parts:(SHAPE_PARTS[shape]||SHAPE_PARTS.box).map(p=>[p[0],p[1]]),
+    steps:[ARCH_SETUP[arch], f(act), f(g[1])], tech:tool.split('·')[0].trim()+' 기법 ('+f(name)+')', effect:ARCH_EFFECT[arch], after:f(g[1]), spec:SHAPE_SPEC[shape]||SHAPE_SPEC.box};
+}
+function genIdeas(type, T, conf){
+  const q = parseCore(T.core||conf.text, conf);
+  const g = GOAL[type] || GOAL.generic;
+  const seen = STATE.seenNames || (STATE.seenNames = new Set());
+  const PL = placeOf(conf,q);
+  // ① 문제 맞춤 씨앗(대상 그룹에 맞는 것, 아직 안 보여 준 것)을 아키텍처마다 하나씩
+  const grp = T.grp||'hkg';
+  const seedsSrc = (type==='generic' ? SYM_SEEDS[conf.sym] : SEEDS[type]) || [];
+  const pool = seedsSrc.filter(sd=>!sd[6] || [...sd[6]].some(ch=>grp.includes(ch)));
+  const out = ['tech','play','system'].map(arch=>{
+    const cands = pool.filter(sd=>sd[0]===arch).map(sd=>seedToConcept(sd,type,T)).filter(c=>!seen.has(c.name));
+    return cands.length ? pickR(cands) : null;
+  });
+  // ② 씨앗이 떨어진 아키텍처만 범용 발상 템플릿으로 채운다 (문제와 동떨어진 재료는 쓰지 않음)
+  const SAFE_TPL = {tech: TPL.tech.filter(t=>/색 바꾸기/.test(t.tool) || (/에너지/.test(t.tool) && ['hot','cold','thirst','safety','sleep'].includes(type))),
+    play: TPL.play, system: TPL.system.filter(t=>!/환경 바꾸기 · \{B\}/.test(t.tool))};
+  const SAFE_THING = THING.filter(x=>['나침반','우편함','모래시계','우산','자판기'].includes(x.n));
+  let best = null, anySet = null;
+  for(let tries=0; tries<25; tries++){
+    const set = ['tech','play','system'].map((arch,ai)=>{
+      if(out[ai]) return out[ai];
+      const t = pickR(SAFE_TPL[arch].length?SAFE_TPL[arch]:TPL[arch]); const B = pickR(BIO), X = pickR(SAFE_THING), E = pickR(ENERGY), F = pickR(FIELD);
+      const tok = {B:B.n,Bf:B.f,Bh:B.h,Bk:B.k,X:X.n,Xf:X.f,Xh:X.h,Xs:X.shape,E:E.n,Eh:E.h,F:F.n,Fm:F.m,Fs:F.shape,
+        G:g[0],D:g[1],N:g[2],K:g[3],PL:PL,P:q.adn?q.coreNF:q.core,
+        'X와':josa(X.n,'과','와').slice(X.n.length),'K를':josa(g[3],'을','를').slice(g[3].length),
+        'Fm을':josa(F.m,'을','를').slice(F.m.length),'PL를':josa(PL,'을','를').slice(PL.length)};
+      const r = str=> fill(String(str).replace(/\{(X와|K를|Fm을|PL를|Bf|Bh|Bk|Xf|Xh|Xs|Eh|Fm|Fs|PL|B|X|E|F|G|D|N|K|P)\}/g,(m,k)=>tok[k]), T);
+      return {arch, tool:r(t.tool), shape:r(t.shape), kind:t.kind, name:r(t.name), line:r(t.line),
+        parts:t.parts.map(([a,b])=>[r(a),r(b)]), steps:t.steps.map(r), tech:r(t.tech), effect:t.effect, after:r(g[1]), spec:t.spec};
+    });
+    anySet = set;
+    const shapesOK = new Set(set.map(c=>c.shape)).size===3;
+    const fresh = set.every(c=>!seen.has(c.name));
+    if(fresh && shapesOK){ best=set; break; }
+    if(!best && fresh) best=set;
+  }
+  best = best || anySet;
+  best.forEach(c=>{ if(!DEV[c.shape]) c.shape='box'; seen.add(c.name); });
+  return best;
+}
+const ORDER = ['family','relation','mind','smudge','picky','exercise','phone','study','hunger','thirst','hot','cold','forget','mess','safety','sleep','lonely'];
+function detectProblem(t){
+  return detectAllProblems(t)[0] || 'generic';
+}
+/* 구체적인 문제: [문장, 어울리는 대상(a=동물 w=개·고양이 f=물고기 p=식물 h=사람), 추천 컨셉 번호(0~2)] */
+const SPEC = {
+ hunger:[['보호자가 늦게 와서 {T가} 밥 시간을 놓치는 문제','a',0],['{T가} 밥을 한꺼번에 너무 빨리 먹어 버리는 문제','w',1],['밖에서는 {T가} 밥을 먹었는지 확인할 수 없는 문제','ah',2],['{F} 양을 매번 알맞게 맞추기 어려운 문제','a',0],['{T에게} 영양제를 언제 줘야 할지 모르는 문제','p',0],['배가 고파도 스스로 {F를} 챙겨 먹기 어려운 문제','h',0],['바쁠 때 {F} 먹는 것을 자꾸 거르는 문제','h',2]],
+ thirst:[['물이 떨어진 것을 모르고 지나쳐 {T가} 목말라하는 문제','ah',2],['물 주는 날을 놓쳐 {T가} 시들어 버리는 문제','p',0],['{T의} 물이 금방 더러워지고 미지근해지는 문제','a',1],['여행 가는 동안 {T에게} 물을 줄 사람이 없는 문제','ap',0],['물을 너무 많이 줘서 {T의} 뿌리가 썩는 문제','p',2],['공부하다 보면 물 마시는 것을 잊는 문제','h',1]],
+ hot:[['한낮에 {T가} 더위 때문에 지치는 문제','awph',0],['밖에서 활동할 때 땀이 너무 많이 나는 문제','h',1],['에어컨을 켜면 전기가 너무 많이 드는 문제','h',2],['뜨거운 햇볕에 {T의} 잎이 타 버리는 문제','p',2],['산책할 때 뜨거운 바닥에 {T의} 발이 데는 문제','d',1],['여름에 어항 물이 너무 뜨거워지는 문제','f',0]],
+ cold:[['겨울밤에 {T가} 추워서 잠을 설치는 문제','wh',0],['밖에 나가면 손발이 금방 차가워지는 문제','h',1],['난방기를 켜 두면 불이 날까 걱정되는 문제','ah',2],['추운 날 {T가} 얼어 버리는 문제','p',0],['겨울에 어항 물이 너무 차가워지는 문제','f',2]],
+ forget:[['외출할 때 꼭 챙길 물건을 두고 나오는 문제','h',0],['해야 할 일을 시간에 맞춰 기억하지 못하는 문제','h',1],['물건을 어디에 두었는지 자꾸 잊는 문제','h',2],['{T} 돌보는 일을 가족 모두 깜빡하는 문제','ap',0],['{T에게} 밥 준 것을 잊고 두 번 주는 문제','a',0]],
+ mess:[['책상 위 물건이 늘 뒤죽박죽인 문제','h',1],['떨어진 쓰레기를 아무도 줍지 않는 문제','h',0],['구석에 쌓인 먼지를 치우기 힘든 문제','hp',2],['{T의} 털이 온 집 안에 날리는 문제','w',2],['어항이 금방 더러워지는 문제','f',0],['{T의} 밥그릇 주변이 늘 지저분한 문제','aw',1],['{T의} 화장실 냄새와 모래가 흩어지는 문제','w',1],['{T} 주변에 흙과 낙엽이 흩어지는 문제','p',2]],
+ safety:[['밤에 어두워서 {T가} 넘어질 수 있는 문제','h',1],['위험한 상황에서 바로 도움을 요청하기 어려운 문제','h',0],['길을 건널 때 차를 미처 보지 못하는 문제','h',1],['산책 중에 {T가} 길을 잃어버리는 문제','d',0],['{T가} 몰래 밖으로 나가 길을 잃는 문제','w',0],['{T가} 위험한 물건을 삼킬 수 있는 문제','a',2],['바람이 세게 불면 {T} 화분이 넘어지는 문제','p',1]],
+ sleep:[['아침에 알람을 듣고도 다시 잠드는 문제','h',1],['밤에 잠이 잘 오지 않는 문제','h',2],['아침에 개운하게 일어나지 못하는 문제','h',0],['밤에 {T가} 깨서 소란을 피우는 문제','w',0]],
+ lonely:[['혼자 있는 {T가} 심심하고 불안해하는 문제','ah',0],['보호자가 없을 때 {T가} 계속 짖거나 우는 문제','d',2],['멀리 있는 가족이 보고 싶은 문제','h',2],['혼자 놀 거리가 없어 지루한 문제','ah',1],['쉬는 시간에 함께 놀 친구가 없는 문제','k',0]],
+ exercise:[['운동을 시작해도 사흘을 못 넘기는 문제','h',2],['간식을 먹고 나면 소파에 눕고만 싶은 문제','h',0],['TV를 보느라 몸을 움직이지 않는 문제','h',1],['혼자 운동하면 지루해서 금방 그만두는 문제','h',2],['운동이 힘들기만 하고 재미가 없는 문제','h',1]],
+ relation:[], mind:[], family:[],
+ smudge:[['얼룩 때문에 햇빛 아래서 {O가} 잘 안 보이는 문제','awfph',0],['손 기름과 지문이 {O에} 금방 묻는 문제','awfph',1],['닦을 천이 없어 옷에 대충 문지르게 되는 문제','awfph',1],['닦아도 금방 다시 더러워지는 문제','awfph',0],['지저분한 {O} 때문에 남에게 보여 주기 부끄러운 문제','awfph',2]],
+ phone:[['잘 시간에도 스마트폰을 놓지 못하는 문제','h',0],['게임 시간 약속을 자꾸 어기는 문제','k',1],['밥 먹을 때도 가족이 모두 폰만 보는 문제','h',2],['해야 할 일을 두고 영상을 계속 보는 문제','h',1]],
+ picky:[['채소만 보면 먹기 싫어하는 문제','h',0],['급식에서 싫어하는 반찬을 늘 남기는 문제','k',1],['새로운 음식을 먹어 보기 두려운 문제','h',2]],
+ study:[['숙제를 자꾸 미루는 문제','k',1],['공부할 때 금방 딴생각이 나는 문제','h',2],['책 읽는 것이 지루한 문제','h',0]],
+ generic:[['‘{P}’ 문제가 왜 생기는지 진짜 원인을 모르는 문제','awfph',0],['‘{P}’ 상황을 해결하려 해도 금방 포기하게 되는 문제','awfph',2],['‘{P}’ 상황을 싫고 귀찮게만 느끼는 문제','awfph',1]]
+};
+const RELATED = {family:[],relation:[],mind:[],smudge:[],exercise:['phone','sleep'],phone:['sleep','study'],picky:['hunger','exercise'],study:['phone','forget'],hunger:['lonely','thirst'],thirst:['forget','hot'],hot:['thirst','sleep'],cold:['sleep','safety'],forget:['mess','sleep'],mess:['forget','safety'],safety:['forget','lonely'],sleep:['forget','lonely'],lonely:['hunger','safety'],generic:['forget','safety']};
+const TYPE_LABEL = {family:'가족 관계',mind:'마음·긴장',relation:'친구 관계',smudge:'얼룩·청소',exercise:'운동 습관',phone:'스마트폰',picky:'편식',study:'공부 습관',hunger:'배고픔',thirst:'물 부족',hot:'더위',cold:'추위',forget:'깜빡함',mess:'정리·청소',safety:'안전',sleep:'잠',lonely:'외로움',generic:'내 문제'};
+/* 키워드가 가장 많이 맞는 유형을 먼저 (같으면 ORDER 순서) */
+function detectAllProblems(t){
+  return ORDER.map((k,i)=>({k,i,n:LIB[k].keys.filter(w=>t.includes(w)).length}))
+    .filter(x=>x.n>0).sort((a,b)=>b.n-a.n||a.i-b.i).map(x=>x.k);
+}
+/* 문제 속 '물건' 찾기 */
+const OBJECTS=[[/(휴대폰|핸드폰)/,'휴대폰 액정'],[/스마트폰/,'스마트폰 액정'],[/(^|\s)폰/,'휴대폰 액정'],[/태블릿|패드/,'태블릿 화면'],[/노트북/,'노트북 화면'],[/모니터/,'모니터 화면'],[/(TV|티비|텔레비전)/,'TV 화면'],[/안경/,'안경알'],[/거울/,'거울'],[/창문/,'창문'],[/시계/,'시계 화면'],[/액정/,'액정']];
+function detectObject(t){ for(const [re,n] of OBJECTS){ if(re.test(t)) return n; } return '화면'; }
+function specsFor(type,T,core){
+  return SPEC[type].filter(([,g])=>[...g].some(ch=>T.grp.includes(ch)))
+    .map(([txt,,rec])=>({text:fill(txt,T).replace('{P}',core), type, rec}));
+}
+/* TRIZ 40가지 발명 원리 중 이 키오스크에서 쓰는 원리 (알츠슐러 번호) */
+const TRIZ_RULES = [
+  [/거꾸로|반대|뒤집/, 13,'반대로 하기'],
+  [/게임|칭찬|도장|놀이|싫은|떨림 →|전화위복/, 22,'전화위복 (해로운 것을 이로운 것으로)'],
+  [/자동화|스스로|셀프/, 25,'셀프서비스 (스스로 작동)'],
+  [/색깔|색 |신호등|눈에 보이게|보이게 하기/, 32,'색 바꾸기'],
+  [/미리|예고|사전/, 10,'사전 조치 (미리 해 두기)'],
+  [/감싸|방패|보호|단열/, 11,'사전 예방 (미리 보호하기)'],
+  [/조금씩|나누기|분류|쪼개/, 1,'분할 (잘게 나누기)'],
+  [/박자|호흡|주기/, 19,'주기적 작용 (리듬 주기)'],
+  [/옮겨|흉내|따라 하기|복제/, 26,'복제 (다른 것을 본뜨기)'],
+  [/작게|몸에|늘 곁|입기/, 2,'추출 (필요한 부분만 떼어 내기)'],
+  [/에너지|햇빛|발전/, 28,'기계 시스템 대체 (다른 에너지 쓰기)'],
+  [/의인화|역지사지|입장|함께|연결|응원/, 24,'매개체 (사이에서 이어 주기)'],
+  [/알림|피드백|원인 찾기|기록/, 23,'피드백 (결과를 알려 주기)'],
+  [/결합|더하기|합체|묶|이야기|경험/, 5,'통합 (여러 기능 합치기)']
+];
+function trizOf(c){
+  if(c.triz && /\d/.test(c.triz)) return c.triz;
+  const t = (c.tech||'')+' '+(c.kind||'');
+  const r = TRIZ_RULES.find(([re])=>re.test(t)) || [null,5,'통합 (여러 기능 합치기)'];
+  return `TRIZ ${r[1]} · ${r[2]}`;
+}
+const COLORS = [{c:'#FF6B4A',cl:'#FFF0EB'},{c:'#12A89A',cl:'#E4F6F4'},{c:'#6C5CE7',cl:'#EEECFD'}];
 
-      // 4. 1분 30초 전체 타이머 후 완전 리셋
-      setTimeout(() => {
-        const toast = document.getElementById('toastPopup');
-        toast.classList.add('show');
-        
-        // 화면 리셋
-        document.getElementById('notePreviewScreen').style.display = 'none';
-        document.getElementById('waitScreen').style.display = 'block';
-        
-        // 입력값 리셋
-        document.getElementById('problemInput').value = '';
-        const allBtns = document.querySelectorAll('.opt-btn');
-        allBtns.forEach(btn => btn.classList.remove('selected'));
+/* ===================== 3. 글자 도우미 ===================== */
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function josa(w,a,b){const c=w.charCodeAt(w.length-1);if(c<0xAC00||c>0xD7A3)return w+b;return w+(((c-0xAC00)%28)?a:b);}
+const PAIRS={'이':['이','가'],'가':['이','가'],'을':['을','를'],'를':['을','를'],'은':['은','는'],'는':['은','는'],'과':['과','와'],'와':['과','와']};
+function fill(s,T){
+  s = s.replace(/\{P\}/g, T.core||'');
+  return s.replace(/\{([TFO])(이|가|을|를|은|는|과|와|에게|에|의)?\}/g,(m,w,j)=>{
+    const word = w==='T'?T.name:w==='O'?(T.obj||'화면'):T.food;
+    if(!j) return word;
+    if(j==='에게'||j==='의'||j==='에') return word+j;
+    return josa(word,...PAIRS[j]);
+  });
+}
+function makeTitle(raw){
+  let t = raw.trim().replace(/[.!?~]+$/,'').trim();
+  t = t.replace(/\s*(을|를)?\s*(해결하고\s?싶어요|해결하고\s?싶다|해결하기|해결해\s?주기|해결|고치기)$/,'').trim();
+  if(/문제$/.test(t)) return t;
+  if(/(요|다|음|함|니다)$/.test(t)) return `‘${t}’ 문제`;
+  return t + ' 문제';
+}
 
-        // 스캔 및 이미지 상태 원래대로 돌려놓기 (다음 사람을 위해)
-        document.getElementById('scannerLine').style.display = 'block';
-        document.getElementById('placeholderText').style.display = 'block';
-        document.getElementById('generatedImage').style.display = 'none';
-        
-        document.getElementById('headerStatus').innerHTML = "💡 <span class='blink-text'>AI가 아이디어를 분석 중입니다...</span>";
-        document.getElementById('previewProblem').innerText = "입력된 문제를 분석하고 있습니다...";
-        document.getElementById('previewProblem').style.color = "#7f8c8d";
-        document.getElementById('previewAssist').innerText = "기발한 해결책을 도출하는 중...";
-        document.getElementById('previewAssist').style.color = "#7f8c8d";
-        document.getElementById('previewFeature').innerText = "과학적 원리 설계 중...";
-        document.getElementById('previewFeature').style.color = "#7f8c8d";
+/* ===================== 4. 그림(SVG) 그리기 ===================== */
+const INK='#2b3340';
+const KIB=[[80,40],[92,48],[106,38],[118,50],[88,58],[102,56],[114,60],[96,30]];
+const DEV = {
+ dispenser(c){return {anchors:[[100,38],[100,93],[132,122],[100,176]],svg:`
+  <rect x="55" y="12" width="90" height="12" rx="6" fill="${c}" stroke="${INK}" stroke-width="3"/>
+  <path d="M60 24H140L128 70H72Z" fill="#e9f5ff" stroke="${INK}" stroke-width="3"/>
+  ${KIB.map(([x,y])=>`<circle cx="${x}" cy="${y}" r="4.5" fill="#c98a4b" stroke="#8a5a2b" stroke-width="1"/>`).join('')}
+  <rect x="62" y="68" width="76" height="74" rx="14" fill="${c}" stroke="${INK}" stroke-width="3"/>
+  <rect x="73" y="79" width="54" height="27" rx="5" fill="#1d2b3a"/>
+  <text x="100" y="98" text-anchor="middle" font-size="14" font-weight="700" fill="#7CFFB2" font-family="monospace">08:00</text>
+  <circle cx="84" cy="123" r="5" fill="#fff"/><circle cx="100" cy="123" r="5" fill="#fff"/><circle cx="116" cy="123" r="5" fill="#ffe066"/>
+  <path d="M88 142h24l-4 15h-16z" fill="#56606e" stroke="${INK}" stroke-width="2"/>
+  <path d="M56 162H144L133 186H67Z" fill="#fff" stroke="${INK}" stroke-width="3"/>
+  <circle cx="92" cy="167" r="4" fill="#c98a4b"/><circle cx="102" cy="165" r="4" fill="#c98a4b"/><circle cx="110" cy="168" r="4" fill="#c98a4b"/>`};},
+ ball(c){return {anchors:[[100,46],[140,78],[62,112],[100,150]],svg:`
+  <ellipse cx="100" cy="186" rx="52" ry="7" fill="#000" opacity=".08"/>
+  <circle cx="100" cy="112" r="64" fill="${c}" stroke="${INK}" stroke-width="3"/>
+  <path d="M40 104Q100 136 160 104" fill="none" stroke="#fff" stroke-width="7" opacity=".55"/>
+  <ellipse cx="76" cy="84" rx="16" ry="10" fill="#fff" opacity=".45" transform="rotate(-30 76 84)"/>
+  <circle cx="84" cy="128" r="9" fill="#1d2b3a"/><circle cx="122" cy="140" r="8" fill="#1d2b3a"/><circle cx="118" cy="104" r="7" fill="#1d2b3a"/>
+  <rect x="87" y="40" width="26" height="14" rx="4" fill="#fff" stroke="${INK}" stroke-width="3"/>
+  <circle cx="140" cy="76" r="11" fill="#fff" stroke="${INK}" stroke-width="3"/><path d="M140 69v7" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="64" cy="176" r="4.5" fill="#c98a4b"/><circle cx="54" cy="184" r="4" fill="#c98a4b"/><circle cx="76" cy="183" r="3.5" fill="#c98a4b"/>`};},
+ station(c){return {anchors:[[100,46],[100,86],[172,132],[100,172]],svg:`
+  <rect x="48" y="162" width="104" height="20" rx="9" fill="${c}" stroke="${INK}" stroke-width="3"/>
+  <rect x="92" y="130" width="16" height="34" fill="#8a93a0" stroke="${INK}" stroke-width="2.5"/>
+  <rect x="36" y="36" width="128" height="98" rx="14" fill="#1d2b3a" stroke="${INK}" stroke-width="3"/>
+  <rect x="47" y="54" width="106" height="68" rx="7" fill="#a8dcff"/>
+  <circle cx="100" cy="46" r="4.5" fill="#fff"/>
+  <circle cx="100" cy="84" r="20" fill="#ffd6a5"/><path d="M80 84a20 20 0 0 1 40 0q-10-12-20-10q-10-2-20 10z" fill="#5b4636"/>
+  <circle cx="93" cy="86" r="2.5" fill="#222"/><circle cx="107" cy="86" r="2.5" fill="#222"/><path d="M93 94q7 6 14 0" fill="none" stroke="#222" stroke-width="2" stroke-linecap="round"/>
+  <path d="M126 64q8 6 0 14M132 60q12 10 0 22" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+  <rect x="160" y="108" width="26" height="48" rx="7" fill="${c}" stroke="${INK}" stroke-width="3"/>
+  <rect x="166" y="146" width="14" height="8" rx="2" fill="#1d2b3a"/>
+  <circle cx="173" cy="163" r="3.5" fill="#c98a4b"/>`};},
+ robot(c){return {anchors:[[100,76],[100,24],[160,104],[100,172]],svg:`
+  <ellipse cx="100" cy="186" rx="46" ry="6" fill="#000" opacity=".08"/>
+  <line x1="100" y1="30" x2="100" y2="48" stroke="${INK}" stroke-width="3"/><circle cx="100" cy="24" r="7" fill="#ffcc33" stroke="${INK}" stroke-width="2.5"/>
+  <rect x="58" y="46" width="84" height="60" rx="20" fill="${c}" stroke="${INK}" stroke-width="3"/>
+  <rect x="69" y="57" width="62" height="38" rx="11" fill="#1d2b3a"/>
+  <ellipse cx="88" cy="74" rx="6" ry="8" fill="#7CFFB2"/><ellipse cx="112" cy="74" rx="6" ry="8" fill="#7CFFB2"/>
+  <path d="M92 86q8 6 16 0" fill="none" stroke="#7CFFB2" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M66 122L42 142" stroke="${INK}" stroke-width="11" stroke-linecap="round"/><path d="M66 122L42 142" stroke="${c}" stroke-width="6" stroke-linecap="round"/>
+  <path d="M134 122L158 104" stroke="${INK}" stroke-width="11" stroke-linecap="round"/><path d="M134 122L158 104" stroke="${c}" stroke-width="6" stroke-linecap="round"/>
+  <path d="M156 94q10-2 12 8M158 110q10 2 14-6" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+  <rect x="66" y="108" width="68" height="52" rx="14" fill="${c}" stroke="${INK}" stroke-width="3"/>
+  <circle cx="100" cy="130" r="10" fill="#fff" stroke="${INK}" stroke-width="2.5"/><circle cx="100" cy="130" r="4" fill="#ff6b6b"/>
+  <circle cx="78" cy="168" r="14" fill="#3a4250" stroke="${INK}" stroke-width="3"/><circle cx="78" cy="168" r="5" fill="#aab2bf"/>
+  <circle cx="122" cy="168" r="14" fill="#3a4250" stroke="${INK}" stroke-width="3"/><circle cx="122" cy="168" r="5" fill="#aab2bf"/>`};},
+ pole(c){return {anchors:[[100,22],[100,132],[146,52],[100,180]],svg:`
+  <ellipse cx="100" cy="180" rx="42" ry="10" fill="#56606e" stroke="${INK}" stroke-width="3"/>
+  <rect x="94" y="84" width="12" height="96" fill="#aab2bf" stroke="${INK}" stroke-width="2.5"/>
+  <rect x="82" y="118" width="36" height="28" rx="6" fill="${c}" stroke="${INK}" stroke-width="3"/>
+  <text x="100" y="137" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="monospace">28°C</text>
+  <circle cx="100" cy="54" r="40" fill="#fff" stroke="${INK}" stroke-width="3"/>
+  ${[0,120,240].map(r=>`<ellipse cx="100" cy="34" rx="11" ry="20" fill="${c}" opacity=".85" transform="rotate(${r} 100 54)"/>`).join('')}
+  <circle cx="100" cy="54" r="8" fill="${INK}"/>
+  <circle cx="100" cy="54" r="40" fill="none" stroke="${INK}" stroke-width="1.5" stroke-dasharray="3 5"/>
+  <path d="M146 40q8 4 0 10M152 36q14 8 0 20M146 58q8 4 0 10" fill="none" stroke="#6ec6ff" stroke-width="2.5" stroke-linecap="round"/>`};},
+ lamp(c){return {anchors:[[100,40],[100,134],[152,96],[100,182]],svg:`
+  <ellipse cx="100" cy="182" rx="40" ry="9" fill="#56606e" stroke="${INK}" stroke-width="3"/>
+  <rect x="95" y="70" width="10" height="112" fill="#aab2bf" stroke="${INK}" stroke-width="2.5"/>
+  <rect x="84" y="122" width="32" height="24" rx="6" fill="${c}" stroke="${INK}" stroke-width="3"/><circle cx="100" cy="134" r="5" fill="#fff"/>
+  <path d="M100 76L58 108h84z" fill="#ffe27a" opacity=".55"/>
+  <path d="M62 72Q62 26 100 26Q138 26 138 72Z" fill="${c}" stroke="${INK}" stroke-width="3"/>
+  <ellipse cx="100" cy="72" rx="38" ry="7" fill="#fff3b0" stroke="${INK}" stroke-width="2.5"/>
+  <path d="M62 96l-14 8M100 100v16M138 96l14 8M76 102l-8 12M124 102l8 12" stroke="#ffb400" stroke-width="3" stroke-linecap="round"/>`};},
+ band(c){return {anchors:[[100,78],[134,66],[34,112],[100,150]],svg:`
+  <ellipse cx="100" cy="112" rx="70" ry="40" fill="none" stroke="${INK}" stroke-width="24"/>
+  <ellipse cx="100" cy="112" rx="70" ry="40" fill="none" stroke="${c}" stroke-width="18"/>
+  <ellipse cx="100" cy="112" rx="70" ry="40" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="6 8" opacity=".7"/>
+  <rect x="72" y="58" width="56" height="42" rx="12" fill="#1d2b3a" stroke="${INK}" stroke-width="3"/>
+  <rect x="79" y="65" width="42" height="28" rx="6" fill="#26394f"/>
+  <path d="M86 80h8l4-8 5 16 4-8h8" fill="none" stroke="#7CFFB2" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="128" y="68" width="8" height="14" rx="3" fill="#ffcc33" stroke="${INK}" stroke-width="2"/>
+  <rect x="88" y="144" width="24" height="12" rx="3" fill="#fff" stroke="${INK}" stroke-width="2.5"/><rect x="92" y="147" width="10" height="6" fill="#4cd964"/>`};},
+ box(c){return {anchors:[[100,52],[134,112],[52,136],[100,172]],svg:`
+  <ellipse cx="100" cy="182" rx="62" ry="6" fill="#000" opacity=".08"/>
+  <rect x="50" y="92" width="100" height="84" rx="4" fill="#fff" stroke="${INK}" stroke-width="3"/>
+  <path d="M36 96L100 36L164 96Z" fill="${c}" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M80 62l18-16 18 16z" fill="#2b5ea8" stroke="#fff" stroke-width="1.5"/><path d="M89 54h18M98 46v16" stroke="#fff" stroke-width="1"/>
+  <path d="M82 176V142a18 18 0 0 1 36 0v34" fill="${c}" opacity=".35" stroke="${INK}" stroke-width="3"/>
+  <rect x="58" y="104" width="22" height="22" rx="3" fill="#bfe6ff" stroke="${INK}" stroke-width="2.5"/><path d="M69 104v22M58 115h22" stroke="${INK}" stroke-width="1.5"/>
+  <rect x="124" y="102" width="20" height="16" rx="3" fill="#1d2b3a"/><circle cx="134" cy="110" r="4" fill="#7CFFB2"/>
+  <rect x="50" y="168" width="100" height="8" fill="${c}" opacity=".6"/>`};},
+ fridge(c){return {anchors:[[88,40],[96,112],[132,100],[96,146]],svg:`
+  <ellipse cx="100" cy="190" rx="50" ry="5" fill="#000" opacity=".08"/>
+  <rect x="56" y="14" width="88" height="172" rx="12" fill="#f4f7fb" stroke="${INK}" stroke-width="3"/>
+  <line x1="56" y1="66" x2="144" y2="66" stroke="${INK}" stroke-width="3"/>
+  <rect x="128" y="28" width="7" height="26" rx="3.5" fill="${INK}"/><rect x="126" y="80" width="10" height="44" rx="5" fill="${c}" stroke="${INK}" stroke-width="2.5"/>
+  <circle cx="76" cy="36" r="7" fill="${c}"/><rect x="88" y="30" width="22" height="14" rx="3" fill="#ffd54a" stroke="${INK}" stroke-width="2"/>
+  <rect x="68" y="90" width="54" height="42" rx="8" fill="#1d2b3a"/>
+  <text x="95" y="112" text-anchor="middle" font-size="15" font-weight="700" fill="#7CFFB2" font-family="monospace">7/10</text>
+  <text x="95" y="126" text-anchor="middle" font-size="8" fill="#9fe7f1" font-family="sans-serif">SQUAT</text>
+  <rect x="68" y="140" width="54" height="12" rx="6" fill="${c}" stroke="${INK}" stroke-width="2.5"/>
+  <circle cx="80" cy="146" r="2.5" fill="#fff"/><circle cx="95" cy="146" r="2.5" fill="#fff"/><circle cx="110" cy="146" r="2.5" fill="#fff"/>
+  <rect x="64" y="184" width="12" height="7" rx="2" fill="${INK}"/><rect x="124" y="184" width="12" height="7" rx="2" fill="${INK}"/>`};},
+ sofa(c){return {anchors:[[100,92],[154,54],[34,130],[100,178]],svg:`
+  <ellipse cx="100" cy="190" rx="70" ry="5" fill="#000" opacity=".08"/>
+  <rect x="34" y="66" width="132" height="62" rx="20" fill="${c}" stroke="${INK}" stroke-width="3"/>
+  <rect x="80" y="80" width="40" height="22" rx="5" fill="#1d2b3a"/><text x="100" y="95" text-anchor="middle" font-size="10" font-weight="700" fill="#7CFFB2" font-family="monospace">82kcal</text>
+  <rect x="26" y="112" width="148" height="40" rx="14" fill="${c}" stroke="${INK}" stroke-width="3"/>
+  <rect x="18" y="98" width="24" height="56" rx="11" fill="${c}" stroke="${INK}" stroke-width="3"/><rect x="158" y="98" width="24" height="56" rx="11" fill="${c}" stroke="${INK}" stroke-width="3"/>
+  <rect x="34" y="152" width="8" height="12" fill="${INK}"/><rect x="158" y="152" width="8" height="12" fill="${INK}"/>
+  <rect x="142" y="40" width="24" height="30" rx="5" fill="#fff" stroke="${INK}" stroke-width="2.5"/><path d="M156 44l-7 12h6l-3 10 9-14h-6l3-8z" fill="#ffcc33" stroke="${INK}" stroke-width="1.2"/>
+  <circle cx="100" cy="176" r="12" fill="#fff" stroke="${INK}" stroke-width="3"/><circle cx="100" cy="176" r="3" fill="${INK}"/>
+  <path d="M100 176l14-8M100 176l-14 8" stroke="${INK}" stroke-width="3" stroke-linecap="round"/><rect x="108" y="163" width="14" height="6" rx="2" fill="${c}" stroke="${INK}" stroke-width="1.5"/><rect x="78" y="183" width="14" height="6" rx="2" fill="${c}" stroke="${INK}" stroke-width="1.5"/>
+  <path d="M100 164V150" stroke="${INK}" stroke-width="2" stroke-dasharray="3 3"/>`};},
+ shoe(c){return {anchors:[[122,84],[142,112],[62,132],[100,166]],svg:`
+  <ellipse cx="100" cy="182" rx="76" ry="6" fill="#000" opacity=".08"/>
+  <path d="M30 150Q28 116 58 108L96 98Q108 70 132 74L150 80Q158 108 170 126Q180 146 162 152H40Q30 152 30 150Z" fill="${c}" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M28 150H174Q178 168 160 170H42Q24 170 28 150Z" fill="#fff" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M100 100l14 10M108 92l14 10M116 86l14 10" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="142" cy="112" r="8" fill="#1d2b3a" stroke="${INK}" stroke-width="2"/><path d="M152 106q5 6 0 12M156 102q9 10 0 20" fill="none" stroke="${INK}" stroke-width="2" stroke-linecap="round"/>
+  <rect x="116" y="76" width="16" height="10" rx="3" fill="#1d2b3a"/><circle cx="124" cy="81" r="2.5" fill="#7CFFB2"/>
+  ${[50,66,82,98,114,130,146].map((x,i)=>`<circle cx="${x}" cy="160" r="3.5" fill="${['#ff5a7a','#ffcc33','#4cd964','#46d3e6','#6c5ce7','#ff5a7a','#ffcc33'][i]}"/>`).join('')}
+  <path d="M48 132q14-4 28 0" fill="none" stroke="#fff" stroke-width="3" opacity=".6" stroke-linecap="round"/>`};},
+ phone(c){return {anchors:[[100,58],[86,130],[150,116],[100,176]],svg:`
+  <ellipse cx="100" cy="192" rx="46" ry="5" fill="#000" opacity=".08"/>
+  <rect x="54" y="10" width="92" height="178" rx="18" fill="${c}" stroke="${INK}" stroke-width="3"/>
+  <rect x="63" y="26" width="74" height="140" rx="9" fill="#bfe3ff"/>
+  <g opacity=".55" fill="none" stroke="#6b7a8c" stroke-width="1.6">
+    <ellipse cx="84" cy="52" rx="9" ry="12"/><ellipse cx="84" cy="52" rx="5" ry="7.5"/><ellipse cx="84" cy="52" rx="1.8" ry="3"/>
+    <ellipse cx="116" cy="70" rx="8" ry="11"/><ellipse cx="116" cy="70" rx="4.5" ry="7"/>
+  </g>
+  <ellipse cx="104" cy="44" rx="10" ry="6" fill="#8a96a6" opacity=".35"/><ellipse cx="78" cy="80" rx="7" ry="4" fill="#8a96a6" opacity=".3"/>
+  <rect x="58" y="96" width="84" height="10" rx="5" fill="#fff" stroke="${INK}" stroke-width="2.5"/>
+  <path d="M62 101h76" stroke="#46d3e6" stroke-width="2" stroke-dasharray="3 3"/>
+  <path d="M78 92l-6-8M100 90v-9M122 92l6-8" stroke="#46d3e6" stroke-width="2.5" stroke-linecap="round"/>
+  <path transform="translate(84 132) scale(.9)" d="M0-10L2.5-2.5L10 0L2.5 2.5L0 10L-2.5 2.5L-10 0L-2.5-2.5Z" fill="#fff"/>
+  <path transform="translate(118 148) scale(.6)" d="M0-10L2.5-2.5L10 0L2.5 2.5L0 10L-2.5 2.5L-10 0L-2.5-2.5Z" fill="#fff"/>
+  <rect x="144" y="100" width="12" height="32" rx="5" fill="#ffcc33" stroke="${INK}" stroke-width="2.5"/><path d="M150 106v20" stroke="${INK}" stroke-width="1.5"/>
+  <circle cx="100" cy="18" r="3" fill="${INK}"/><rect x="86" y="172" width="28" height="6" rx="3" fill="#fff" stroke="${INK}" stroke-width="1.5"/>`};},
+ cup(c){return {anchors:[[100,52],[100,146],[152,142],[100,182]],svg:`
+  <ellipse cx="100" cy="184" rx="56" ry="7" fill="#56606e"/>
+  <path d="M36 118H164L150 178H50Z" fill="${c}" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+  <ellipse cx="100" cy="118" rx="64" ry="11" fill="#9fd8ff" stroke="${INK}" stroke-width="3"/>
+  <rect x="94" y="92" width="12" height="26" rx="3" fill="#fff" stroke="${INK}" stroke-width="2.5"/>
+  <path d="M100 92Q100 50 74 110M100 92Q100 50 126 110M100 92V52" fill="none" stroke="#3ba7f0" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="100" cy="50" r="4" fill="#3ba7f0"/>
+  <rect x="84" y="138" width="32" height="18" rx="4" fill="#fff" opacity=".85" stroke="${INK}" stroke-width="2"/>
+  <path d="M140 132l6 20" stroke="#fff" stroke-width="5" opacity=".6" stroke-linecap="round"/>`};}
+};
 
-        setTimeout(() => {
-          toast.classList.remove('show');
-        }, 4000);
+function targetIcon(id){
+  const face=`<circle cx="42" cy="48" r="3.2" fill="#222"/><circle cx="58" cy="48" r="3.2" fill="#222"/>`;
+  switch(id){
+   case 'dog': return `<ellipse cx="26" cy="46" rx="11" ry="21" fill="#8a5a2b" stroke="${INK}" stroke-width="2.5" transform="rotate(22 26 46)"/><ellipse cx="74" cy="46" rx="11" ry="21" fill="#8a5a2b" stroke="${INK}" stroke-width="2.5" transform="rotate(-22 74 46)"/><circle cx="50" cy="55" r="29" fill="#e0a86a" stroke="${INK}" stroke-width="2.5"/><ellipse cx="50" cy="68" rx="15" ry="11" fill="#f6dcb6"/>${face.replace(/48/g,'50')}<ellipse cx="50" cy="63" rx="5.5" ry="4" fill="#222"/><path d="M46 72q4 9 8 0z" fill="#ff7a8a"/>`;
+   case 'cat': return `<path d="M22 44L28 12L46 30Z" fill="#f2a541" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><path d="M78 44L72 12L54 30Z" fill="#f2a541" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><circle cx="50" cy="56" r="29" fill="#f5b85e" stroke="${INK}" stroke-width="2.5"/><ellipse cx="41" cy="52" rx="3.5" ry="5" fill="#222"/><ellipse cx="59" cy="52" rx="3.5" ry="5" fill="#222"/><path d="M47 62h6l-3 4z" fill="#ff7a8a"/><path d="M26 62h14M26 68l14-3M74 62H60M74 68l-14-3" stroke="${INK}" stroke-width="1.5"/>`;
+   case 'fish': return `<path d="M70 50L92 32V68Z" fill="#ff8a3d" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><ellipse cx="44" cy="50" rx="30" ry="21" fill="#ffa14a" stroke="${INK}" stroke-width="2.5"/><path d="M40 30q8 -8 16 2" fill="#ff8a3d" stroke="${INK}" stroke-width="2"/><circle cx="30" cy="46" r="4.5" fill="#fff"/><circle cx="30" cy="46" r="2.2" fill="#222"/><path d="M50 38q6 12 0 24" fill="none" stroke="${INK}" stroke-width="1.5"/><circle cx="14" cy="26" r="4" fill="none" stroke="#6ec6ff" stroke-width="2"/><circle cx="8" cy="14" r="2.5" fill="none" stroke="#6ec6ff" stroke-width="2"/>`;
+   case 'pet': return `<circle cx="30" cy="34" r="9" fill="#e8c39e" stroke="${INK}" stroke-width="2.5"/><circle cx="70" cy="34" r="9" fill="#e8c39e" stroke="${INK}" stroke-width="2.5"/><ellipse cx="50" cy="60" rx="32" ry="27" fill="#f0d2b0" stroke="${INK}" stroke-width="2.5"/>${face.replace(/48/g,'54')}<circle cx="50" cy="62" r="3" fill="#ff7a8a"/><circle cx="32" cy="64" r="5" fill="#ffb3b3" opacity=".7"/><circle cx="68" cy="64" r="5" fill="#ffb3b3" opacity=".7"/>`;
+   case 'plant': return `<path d="M50 64V30" stroke="#3c9a3f" stroke-width="4"/><ellipse cx="36" cy="40" rx="15" ry="8" fill="#5cc160" stroke="${INK}" stroke-width="2" transform="rotate(-30 36 40)"/><ellipse cx="64" cy="34" rx="15" ry="8" fill="#5cc160" stroke="${INK}" stroke-width="2" transform="rotate(30 64 34)"/><circle cx="50" cy="22" r="9" fill="#ffcc33" stroke="${INK}" stroke-width="2"/><circle cx="50" cy="22" r="3.5" fill="#e67e22"/><rect x="26" y="62" width="48" height="9" rx="3" fill="#b85a35" stroke="${INK}" stroke-width="2.5"/><path d="M30 71H70L64 94H36Z" fill="#d06b3f" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>`;
+   default: {
+     const hair = id==='elder' ? `<path d="M28 44q0-24 22-24t22 24q-6-12-22-12t-22 12z" fill="#d7dbe0" stroke="${INK}" stroke-width="2"/>`
+               : id==='baby' ? `<path d="M46 24q4-8 8 0" fill="none" stroke="#5b4636" stroke-width="3" stroke-linecap="round"/>`
+               : id==='kid' ? `<path d="M27 46q-2-28 23-28t23 28q-8-14-23-14t-23 14z" fill="#3b2a20" stroke="${INK}" stroke-width="2"/>`
+               : `<path d="M27 44q0-26 23-26t23 26q-4-8-10-10q-10 6-26 2q-6 2-10 8z" fill="#5b4636" stroke="${INK}" stroke-width="2"/>`;
+     const extra = id==='elder' ? `<circle cx="42" cy="50" r="6" fill="none" stroke="${INK}" stroke-width="2"/><circle cx="58" cy="50" r="6" fill="none" stroke="${INK}" stroke-width="2"/><path d="M48 50h4" stroke="${INK}" stroke-width="2"/>` : '';
+     const shirt = id==='kid'?'#4d96ff':id==='baby'?'#ffd166':id==='elder'?'#8e7cc3':'#12A89A';
+     return `<path d="M18 100Q18 72 50 72Q82 72 82 100Z" fill="${shirt}" stroke="${INK}" stroke-width="2.5"/><circle cx="50" cy="48" r="${id==='baby'?19:22}" fill="#f7d3b3" stroke="${INK}" stroke-width="2.5"/>${hair}${face.replace(/48/g,'50')}${extra}<path d="M43 58q7 6 14 0" fill="none" stroke="${INK}" stroke-width="2.2" stroke-linecap="round"/><circle cx="36" cy="57" r="3.5" fill="#ffb3b3" opacity=".7"/><circle cx="64" cy="57" r="3.5" fill="#ffb3b3" opacity=".7"/>`;
+   }
+  }
+}
+const HEART = `<path d="M0-4C-6-12-16-4 0 8C16-4 6-12 0-4Z" fill="#ff5a7a"/>`;
+const SPARK = (x,y,s,col)=>`<path transform="translate(${x} ${y}) scale(${s})" d="M0-10L2.5-2.5L10 0L2.5 2.5L0 10L-2.5 2.5L-10 0L-2.5-2.5Z" fill="${col}"/>`;
 
-      }, 90000); // 90초 (1분 30초 대기)
+let SCN = 0;
+/* 3D 동화 느낌 기본 일러스트: 입체 조명(스페큘러) + 부드러운 그림자 + 스튜디오 배경 */
+function scene(concept, T, col){
+  const d = DEV[concept.shape](col.c); const u = ++SCN;
+  return `<svg viewBox="0 0 260 170" xmlns="http://www.w3.org/2000/svg">
+   <defs>
+    <radialGradient id="bg${u}" cx="45%" cy="30%" r="80%"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="${col.cl}"/><stop offset="1" stop-color="${col.c}" stop-opacity=".35"/></radialGradient>
+    <radialGradient id="fl${u}" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#1e2530" stop-opacity=".28"/><stop offset="1" stop-color="#1e2530" stop-opacity="0"/></radialGradient>
+    <linearGradient id="st${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".0"/><stop offset="1" stop-color="#ffffff" stop-opacity=".75"/></linearGradient>
+    <filter id="f${u}" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3.2" result="b"/>
+      <feSpecularLighting in="b" surfaceScale="5" specularConstant=".85" specularExponent="22" lighting-color="#ffffff" result="sp"><fePointLight x="-40" y="-70" z="190"/></feSpecularLighting>
+      <feComposite in="sp" in2="SourceAlpha" operator="in" result="spi"/>
+      <feComposite in="SourceGraphic" in2="spi" operator="arithmetic" k1="0" k2="1" k3=".8" k4="0" result="lit"/>
+      <feDropShadow in="lit" dx="0" dy="7" stdDeviation="5" flood-color="#1e2530" flood-opacity=".22"/>
+    </filter>
+    <filter id="g${u}"><feGaussianBlur stdDeviation="2.2"/></filter>
+   </defs>
+   <rect width="260" height="170" fill="url(#bg${u})"/>
+   <circle cx="30" cy="40" r="16" fill="#fff" opacity=".45" filter="url(#g${u})"/><circle cx="232" cy="30" r="10" fill="#fff" opacity=".6" filter="url(#g${u})"/><circle cx="210" cy="140" r="14" fill="${col.c}" opacity=".18" filter="url(#g${u})"/>
+   <path d="M0 132 Q130 112 260 132 V170 H0Z" fill="url(#st${u})"/>
+   <ellipse cx="100" cy="158" rx="68" ry="9" fill="url(#fl${u})"/><ellipse cx="200" cy="160" rx="34" ry="6" fill="url(#fl${u})"/>
+   <g filter="url(#f${u})"><g transform="translate(22 4) scale(.8)">${d.svg}</g></g>
+   <g filter="url(#f${u})"><g transform="translate(166 78) scale(.84)">${targetIcon(T.id)}</g></g>
+   <g transform="translate(222 64)" filter="url(#f${u})">${HEART}</g>
+   ${SPARK(196,32,1,'#ffcc33')}${SPARK(36,26,.7,col.c)}${SPARK(150,20,.5,'#fff')}
+  </svg>`;
+}
+
+function blueprint(concept, col){
+  const d = DEV[concept.shape](col.c);
+  const K=1.46, OX=54, OY=34;
+  const pts = d.anchors.map(([x,y],i)=>({i,x:x*K+OX,y:y*K+OY,side:(x<100||(x===100&&i%2===0))?'L':'R'}));
+  ['L','R'].forEach(side=>{
+    const arr = pts.filter(p=>p.side===side).sort((a,b)=>a.y-b.y);
+    let last=-99;
+    arr.forEach(p=>{p.ly=Math.min(Math.max(p.y,40,last+40),340);last=p.ly;});
+  });
+  const callouts = pts.map(p=>{
+    const lx = p.side==='L'?24:376;
+    const ex = p.side==='L'?lx+12:lx-12;
+    return `<path d="M${p.x} ${p.y}L${ex+(p.side==='L'?18:-18)} ${p.ly}H${ex}" fill="none" stroke="${INK}" stroke-width="1.3" stroke-dasharray="4 3"/>
+      <circle cx="${p.x}" cy="${p.y}" r="3.5" fill="${INK}"/>
+      <circle cx="${lx}" cy="${p.ly}" r="12" fill="${col.c}" stroke="#fff" stroke-width="2"/>
+      <text x="${lx}" y="${p.ly+4.5}" text-anchor="middle" font-size="13" font-weight="900" fill="#fff" font-family="sans-serif">${p.i+1}</text>`;
+  }).join('');
+  return `<svg viewBox="0 0 400 360" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+   <defs><pattern id="g" width="16" height="16" patternUnits="userSpaceOnUse"><path d="M16 0H0V16" fill="none" stroke="#dbe6f2" stroke-width="1"/></pattern></defs>
+   <rect width="400" height="360" fill="#f7fbff"/><rect width="400" height="360" fill="url(#g)"/>
+   <text x="10" y="16" font-size="9" fill="#8a9ab0" font-family="sans-serif" font-weight="700" letter-spacing="1">DESIGN DRAWING · 설계 스케치</text>
+   <line x1="200" y1="24" x2="200" y2="352" stroke="#b9cbe0" stroke-dasharray="8 4 2 4"/>
+   <g transform="translate(${OX} ${OY}) scale(${K})">${d.svg}</g>
+   ${callouts}
+  </svg>`;
+}
+
+function stepIcon(k, concept, T, col){
+  const d = DEV[concept.shape](col.c);
+  if(k===0) return `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="${col.cl}"/><g transform="translate(10 8) scale(.42)">${d.svg}</g><g transform="translate(62 18) scale(1.2)"><circle r="12" fill="#fff" stroke="${INK}" stroke-width="2"/><path d="M0-7V0L5 4" stroke="${INK}" stroke-width="2" fill="none" stroke-linecap="round"/></g></svg>`;
+  if(k===1) return `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="${col.cl}"/><g transform="translate(8 8) scale(.42)">${d.svg}</g>${SPARK(80,24,.9,'#ffcc33')}<path d="M84 50q8 6 0 14M78 56q4 3 0 6" fill="none" stroke="${col.c}" stroke-width="3" stroke-linecap="round"/></svg>`;
+  return `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="${col.cl}"/><g transform="translate(12 16) scale(.76)">${targetIcon(T.id)}</g><g transform="translate(80 22) scale(1.1)">${HEART}</g></svg>`;
+}
+
+/* ===================== 5. 화면 동작 ===================== */
+let STATE = {concepts:[], sel:-1, T:null, title:'', core:'', raw:''};
+const $ = id=>document.getElementById(id);
+
+const EXAMPLES = ['강아지가 혼자 있을 때 배고파 하는 문제','50대 여성이 살이 쪘는데 운동을 싫어하는 문제','화분에 물 주는 걸 자꾸 깜빡하는 문제','여름에 교실 창가가 너무 더운 문제','준비물을 자꾸 집에 두고 오는 문제','할머니가 밤에 넘어질까 걱정되는 문제'];
+$('chips').innerHTML = EXAMPLES.map(e=>`<button type="button">${esc(e)}</button>`).join('');
+$('chips').querySelectorAll('button').forEach(b=>b.onclick=()=>{$('prob').value=b.textContent;analyzeInput();});
+
+$('prob').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing)analyzeInput();});
+$('prob').addEventListener('input',()=>{ if(STATE.raw && $('prob').value.trim()!==STATE.raw){ $('hint').textContent='문제를 바꿨다면 아이디어 떠올리기를 다시 눌러 주세요'; }});
+
+/* ---------- AI 모드 (Google Gemini) ---------- */
+const AI = {on:false, key:'', model:'gemini-2.5-flash', img:true, imgModel:'gemini-2.5-flash-image'};
+try{ const sv = JSON.parse(localStorage.getItem('inventionAI')||'{}'); Object.assign(AI, sv); }catch(e){}
+function refreshBadge(){
+  const on = AI.on && AI.key;
+  $('modeBadge').textContent = on ? (AI.img!==false?'AI 모드 켜짐 · 글+3D 그림':'AI 모드 켜짐 · Gemini') : '기본 모드 · 인터넷 없이';
+  $('modeBadge').classList.toggle('on', !!on);
+}
+function openSet(){ $('aiOn').checked=AI.on; $('aiKey').value=AI.key; $('aiModel').value=AI.model; $('aiImg').checked=AI.img!==false; $('aiImgModel').value=AI.imgModel||'gemini-2.5-flash-image'; $('setModal').style.display='flex'; }
+function closeSet(){ $('setModal').style.display='none'; }
+function saveSet(){
+  AI.on=$('aiOn').checked; AI.key=$('aiKey').value.trim(); AI.model=$('aiModel').value.trim()||'gemini-2.5-flash'; AI.img=$('aiImg').checked; AI.imgModel=$('aiImgModel').value.trim()||'gemini-2.5-flash-image';
+  try{ localStorage.setItem('inventionAI', JSON.stringify(AI)); }catch(e){}
+  closeSet(); refreshBadge();
+}
+refreshBadge();
+const aiReady = ()=> AI.on && AI.key;
+
+async function callGemini(prompt, temp){
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(AI.model)}:generateContent?key=${encodeURIComponent(AI.key)}`;
+  const ctrl = new AbortController(); const tm = setTimeout(()=>ctrl.abort(), 45000);
+  try{
+    const r = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},signal:ctrl.signal,
+      body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{responseMimeType:'application/json',temperature:temp||1.0,topP:0.95}})});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const j = await r.json();
+    const t = (j.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('').replace(/^\s*```(json)?/,'').replace(/```\s*$/,'').trim();
+    return JSON.parse(t);
+  } finally { clearTimeout(tm); }
+}
+/* ---------- AI 3D 동화 일러스트 (이미지 생성) ---------- */
+async function genImage(prompt){
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(AI.imgModel||'gemini-2.5-flash-image')}:generateContent?key=${encodeURIComponent(AI.key)}`;
+  const ctrl = new AbortController(); const tm = setTimeout(()=>ctrl.abort(), 90000);
+  try{
+    const r = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},signal:ctrl.signal,
+      body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{responseModalities:['IMAGE','TEXT']}})});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const j = await r.json();
+    const part = (j.candidates?.[0]?.content?.parts||[]).find(p=>p.inlineData||p.inline_data);
+    const d = part && (part.inlineData||part.inline_data);
+    if(!d || !d.data) throw new Error('그림 없음');
+    return `data:${d.mimeType||d.mime_type||'image/png'};base64,${d.data}`;
+  } finally { clearTimeout(tm); }
+}
+const WHO_EN = {dog:'a cute fluffy puppy',cat:'a cute cat',fish:'a little goldfish in a bowl',pet:'a small hamster',plant:'a potted plant',baby:'a happy baby with a parent',elder:'a kind smiling grandparent',kid:'a cheerful elementary school child',adult:'a friendly adult'};
+const COLOR_EN = ['coral orange','mint teal','lavender purple'];
+const ARCH_EN = {tech:'a clever smart gadget with soft glowing lights and screens',play:'a playful, game-like toy or object full of fun and warmth',system:'a surprising, witty object that flips the situation around'};
+function imagePrompt(c, k, T){
+  const who = STATE.conf && STATE.conf.type==='family' ? 'a warm family at home (a child with parents)' : (WHO_EN[T.id]||'a cheerful child');
+  return `Studio-quality 3D storybook illustration in a soft, cute animated-film style: rounded clay-like shapes, gentle global illumination, soft studio lighting, subtle depth of field, high detail, 4:3 composition.
+Hero subject: an imaginative invention for children, ${ARCH_EN[c.arch]||'a friendly invention'}.
+Invention name (Korean, for meaning only): "${c.name}". What it does (Korean): ${c.line}
+Key parts that must be visible (Korean): ${c.parts.map(p=>p[0]).join(', ')}.
+${c.visual?`Visual description: ${c.visual}`:''}
+Show the invention clearly in the center, being used happily by ${who}. Main color theme: ${COLOR_EN[k]} with warm pastel accents, simple softly lit studio backdrop.
+Friendly and safe for elementary school students. Absolutely no text, letters, numbers, logos or watermarks anywhere in the image.`;
+}
+function startImages(list){
+  if(!(aiReady() && AI.img!==false)) return;
+  list.forEach((c,k)=>{
+    if(c.img || c.imgState==='loading') return;
+    c.imgState='loading'; updateIll(c);
+    genImage(imagePrompt(c,k,STATE.T)).then(src=>{ c.img=src; c.imgState='done'; updateIll(c); })
+      .catch(()=>{ c.imgState='fail'; updateIll(c); });
+  });
+}
+function illHTML(c,k){
+  const T = STATE.T;
+  if(c.img) return `<img src="${c.img}" alt="${esc(c.name)} 3D 일러스트"><span class="src">AI 3D 일러스트</span>`;
+  return scene(c,T,COLORS[k]) + (c.imgState==='loading' ? `<div class="shine"></div><div class="ov"><div class="sp"></div>3D 동화 일러스트를 그리는 중...</div>` : c.imgState==='fail' ? `<span class="src">기본 일러스트</span>` : '');
+}
+function updateIll(c){
+  const k = STATE.concepts ? STATE.concepts.indexOf(c) : -1; if(k<0) return;
+  const el = document.querySelector(`#compare .icard[data-i="${k}"] .ill`); if(el) el.innerHTML = illHTML(c,k);
+}
+
+/* ---------- 3대 혁신 발명 아키텍처 ---------- */
+const ARCH = [
+  {key:'tech',  name:'스마트 기기형',   sub:'기술로 해결해요 · 센서·로봇·스마트 연결', c2:'#ff9a5a',
+   icon:'<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="6" fill="none" stroke="#fff" stroke-width="3"/><path d="M16 3v5M16 24v5M3 16h5M24 16h5M6.8 6.8l3.5 3.5M21.7 21.7l3.5 3.5M6.8 25.2l3.5-3.5M21.7 10.3l3.5-3.5" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>'},
+  {key:'play',  name:'놀이·경험형',     sub:'마음을 움직여 해결해요 · 게임·칭찬·이야기', c2:'#3fd7c3',
+   icon:'<svg viewBox="0 0 32 32"><rect x="3" y="9" width="26" height="15" rx="7" fill="none" stroke="#fff" stroke-width="3"/><path d="M10 13v7M6.5 16.5h7" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="21" cy="14.5" r="1.8" fill="#fff"/><circle cx="24.5" cy="18.5" r="1.8" fill="#fff"/></svg>'},
+  {key:'system',name:'역발상·시스템형', sub:'판을 바꿔 해결해요 · 거꾸로·엉뚱한 결합·규칙·함께', c2:'#a78bfa',
+   icon:'<svg viewBox="0 0 32 32"><path d="M8 11a9 9 0 0 1 15-3l2 2M24 21a9 9 0 0 1-15 3l-2-2" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M25 4v6h-6M7 28v-6h6" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>'}
+];
+const ARCH_RE = {
+  tech:/로봇|자동|스마트|센서|연결|알림|카메라|화면|착용|밴드|램프|급식|거치대|타이머|전자|모터|스테이션|케이스|와이퍼|기기|팬|펌프/g,
+  play:/놀이|게임|칭찬|이야기|재미|장난|보물|도장|퍼즐|키우기|연습|리허설|응원|박수|쿠폰|쪽지|고마|탐정|먹이볼|데굴/g,
+  system:/거꾸로|역발상|반대|뒤집|결합|의인화|입장|함께|규칙|환경|친환경|그늘|태양광|문화|차례|반 전체|가족|판을|번갈아|합체|쉼터|하우스/g
+};
+function archScore(c,key){ const t=[c.kind,c.name,c.tech,c.line].join(' '); return (t.match(ARCH_RE[key])||[]).length + (c.arch===key?10:0); }
+/* 세 컨셉을 세 아키텍처에 하나씩 배정 (6가지 순열 중 점수 최대) */
+function arrangeByArch(list, rec){
+  const perms=[[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
+  let best=perms[0], bs=-1;
+  perms.forEach(pm=>{ const sc = pm.reduce((a,ci,ai)=>a+archScore(list[ci],ARCH[ai].key),0); if(sc>bs){bs=sc;best=pm;} });
+  const out = best.map((ci,ai)=>Object.assign(list[ci],{arch:ARCH[ai].key}));
+  return {list:out, rec: Math.max(0, best.indexOf(rec))};
+}
+
+const COACH = `너는 초등학생 발명 교실의 발명 코치다. 결과는 초등학생이 읽고 바로 이해할 수 있는 쉽고 친근한 한국어(~해요 체)로 쓴다. 안전하고 교육적으로 적절해야 하며, 사람의 몸·외모·나이를 놀리거나 비하하지 않는다.`;
+const SHAPES = `dispenser(급식기·배출기 | 부품 순서: ①위 저장통 ②가운데 화면 ③옆 모터 ④아래 그릇), ball(공·볼 | ①위 뚜껑 ②오른쪽 다이얼 ③겉면 ④속 아래), station(화면 달린 스탠드·스마트 기기 | ①카메라 ②화면 ③옆 칸·버튼 ④받침대), robot(바퀴 달린 로봇 | ①얼굴 화면 ②안테나 ③팔 ④바퀴), pole(선풍기형 타워 | ①머리 날개 ②가운데 조절기 ③옆 분사구 ④받침), lamp(스탠드 램프 | ①전등갓 ②조절 버튼 ③빛 ④받침대), band(팔찌·머리띠·넥밴드 | ①모듈 화면 ②버튼 ③밴드 ④배터리), box(집·상자·보관함 | ①지붕·뚜껑 ②표시등 ③옆 칸 ④바닥), cup(그릇·분수·컵 | ①꼭지 ②안쪽 장치 ③옆면 ④받침), fridge(냉장고·사물함·문 달린 장 | ①위 칸 ②문 화면 ③손잡이 ④아래 센서), sofa(의자·소파·침대 | ①등받이 화면 ②배터리 ③팔걸이 ④발판), shoe(신발·장갑 등 몸에 신는 것 | ①발등 센서 ②스피커 ③옆면 LED ④밑창), phone(휴대폰·태블릿·케이스 | ①윗부분 ②화면 ③옆 버튼 ④아래 부분)`;
+
+const KW = c=>`학생이 직접 확인한 핵심 키워드(반드시 지킬 것): 누가=${c.subj||'(없음)'} / 무엇이=${c.obj||'(없음)'} / 어떤 불편=${c.sym||'(없음)'} / 언제·어디서=${c.sit||'(없음)'}${Object.keys(c.meanings||{}).length?` / 낱말 뜻: ${Object.entries(c.meanings).map(([w,m])=>`'${w}'=${m}`).join(', ')}`:''}
+키워드의 '뜻'은 절대 바꾸지 않는다(다른 뜻으로 해석 금지). 대신 표현과 생각은 자유롭게 넓혀서, 원인·마음·주변·결과까지 깊이 추론한다. 결과가 키워드의 문제에서 벗어나지만 않으면 된다.`;
+function specPrompt(raw, c){ return `${COACH}
+학생이 입력한 문제: "${raw}"
+${KW(c)}
+1) 이 문제의 주인공을 찾아 target_name(짧은 명사, 예: "50대 여성", "강아지", "우리 반 친구들")과 icon(dog, cat, fish, pet, plant, baby, elder, kid, adult 중 하나)을 정한다.
+2) 먼저 이 문제를 깊이 추론한다: 왜 생길까(원인 가설 3~4개), 언제 가장 심할까, 당사자의 마음은 어떨까, 주변에 누가 관련될까, 그냥 두면 어떤 결과가 생길까.
+3) 그 추론을 바탕으로 "해결하고 싶은 구체적인 문제" 6개를 만든다. 뻔한 말 바꾸기가 아니라, 학생이 미처 생각하지 못한 새로운 관점이 들어가야 한다.
+ - 6개는 서로 다른 생각 렌즈를 쓴다: 원인, 순간, 마음, 반복, 주변, 도움, 결과, 도구 중에서 고른다.
+ - 각 문제에는 왜 이 관점이 중요한지 한 줄(why, 30자 이내)을 붙인다.
+ - 먼저 문제 문장에서 [대상(누구·무엇)]과 [증상(무엇이 불편한지)]을 정확히 찾는다. 예: "휴대폰 액정이 얼룩져 잘 안 보이는 문제" → 대상=휴대폰 액정, 증상=얼룩·지저분함. 5개 모두 이 대상과 증상 안에서만 쪼갠다.
+ - 문장에 나온 낱말만 보고 다른 뜻으로 넘어가지 않는다(예: '휴대폰'이 나왔다고 휴대폰 사용 시간 문제로 바꾸지 않는다).
+ - 원인, 감정(왜 싫은지), 상황(언제·어디서), 방해 요인, 주변 사람 등 서로 다른 각도에서 본다.
+ - 각 문장은 반드시 "문제"로 끝나고 45자 이내다. 가장 해결 가치가 큰 문제부터 정렬한다.
+ - 친구 관계(놀림·다툼 등) 문제라면 누군가를 벌주거나 감시하는 쪽이 아니라 마음 표현, 서로 존중, 어른에게 도움 요청 쪽으로 생각한다.
+JSON만 출력: {"target_name":"","icon":"","analysis":{"causes":["","",""],"worst_moment":"","feeling":"","people":""},"specifics":[{"text":"","lens":"원인","why":""}]}`; }
+
+function conceptPrompt(raw, spec, T, c, avoid){
+  const B = pickR(BIO), X = pickR(THING), F = pickR(FIELD);
+  const sp = STATE.specs&&STATE.specs[STATE.spec];
+  return `${COACH}
+너는 지금부터 세계적인 발명 코치이자 어린이 발명대회 심사위원이다. 뻔한 답이 아니라 "와, 그런 생각을!" 하는 발명품을 만든다.
+
+[해결할 문제]
+- 처음 입력한 문제: "${raw}"
+- 학생이 고른 구체적인 문제: "${spec}"  (주인공: ${T.name})${sp&&sp.why?`\n- 이 문제를 고른 관점: ${sp.tag} — ${sp.why}`:''}
+${KW(c)}
+
+[1단계 · 문제 해부] 속으로 먼저 분석한다.
+- 이 문제가 생기는 진짜 원인 3가지(물리적 원인, 습관·마음의 원인, 환경·사람 사이의 원인)
+- 문제가 가장 심해지는 순간, 장소, 함께 있는 사람
+- 해결책이 지켜야 할 조건: 초등학생이 이해하고 스케치할 수 있을 것, 안전할 것, 주인공의 상황에 실제로 맞을 것
+
+[2단계 · 발산] 서로 다른 발상 도구로 후보를 최소 10개 떠올린다. 도구마다 적어도 1개씩:
+ SCAMPER(대체·결합·적용·변형·다른 용도·제거·뒤집기), TRIZ 발명 원리, 생체 모방(자연에서 빌려 오기), 강제 결합(엉뚱한 사물과 합치기),
+ 다른 분야 빌려 오기(스포츠·요리·우주·놀이공원·마술 등), 거꾸로 생각하기, 크기·시간 바꾸기(아주 작게/아주 크게, 미리/나중에), 사람 사이의 규칙 바꾸기.
+ 이번 발상 씨앗(적어도 한 후보는 이 씨앗에서 출발): 자연="${B.n}(${B.f})", 사물="${X.n}(${X.f})", 다른 분야="${F.n}(${F.m})".
+ candidates에 후보를 "아이디어 한 줄 | 쓴 발상 도구" 형식으로 적는다.
+
+[3단계 · 수렴] 후보를 (문제 딱 맞음 40%, 참신함 30%, 만들 수 있음 20%, 재미 10%)로 속으로 평가해, 아래 세 아키텍처에 가장 뛰어난 것을 하나씩 뽑는다.
+- 컨셉 1 = [스마트 기기형, arch "tech"]: 새로운 작동 원리를 가진 장치. 단, "센서가 알아채고 알림", "타이머로 자동", "앱과 연결", "로봇이 대신 해 줌"만으로 끝나는 뻔한 장치는 탈락. 작동 원리 자체가 새로워야 한다.
+- 컨셉 2 = [놀이·경험형, arch "play"]: 게임·수집·이야기·역할극·감각 놀이로 사람의 마음과 행동을 바꾼다. "칭찬 스티커 붙이기" 수준의 흔한 보상판은 탈락.
+- 컨셉 3 = [역발상·시스템형, arch "system"]: 거꾸로 생각하기, 엉뚱한 결합, 규칙·공간·공동체의 판을 바꾼다. 웃음이 나는 재치를 환영하지만 반드시 문제를 해결해야 한다.
+- 세 컨셉은 모양(shape), 작동 원리, 발상 도구가 모두 서로 달라야 한다.
+- 이 문제와 상황(누가, 어디서, 언제)에만 딱 맞는 구체적인 장면이 떠올라야 한다. 다른 문제에 그대로 써도 되는 두루뭉술한 발명은 탈락.
+${avoid&&avoid.length?`- 이미 보여 준 아이디어와 겹치지 않는 완전히 새로운 것을 만든다. 이미 나온 것: ${avoid.join(', ')}`:''}
+- 가족 갈등(부모님 다툼 등) 문제라면 아이가 부모를 고치거나 감시하는 쪽이 아니라, 아이의 마음 돌보기와 가족의 대화·고마움 표현을 돕는 쪽으로 만든다.
+- 친구 관계 문제라면 벌·감시·보복이 아니라 마음 표현, 입장 바꿔 보기, 존중하는 문화, 어른에게 도움 요청하기로 해결한다.
+
+[4단계 · 작성 규칙]
+- name: 기억하기 쉽고 재치 있는 한국어(15자 이내). kind: 컨셉 성격 7자 이내. tool: 이 컨셉을 만든 발상 도구와 재료(예: "생체 모방 · 흰개미 집", "강제 결합 · 우산").
+- line: 무엇을, 어떻게 바꿔서, 왜 해결되는지 드러나는 한 문장(50자 이내).
+- shape는 발명품 모양과 가장 닮은 것 하나: ${SHAPES}
+- parts는 정확히 4개이며 고른 shape의 부품 순서(①②③④)에 맞춘다. 각 부품은 [이름(10자 이내), 하는 일(20자 이내)].
+- steps는 정확히 3개(각 25자 이내). after와 effect는 각 40자 이내 한 문장.
+- tech는 발명 기법 이름과 괄호 속 짧은 설명. triz는 가장 잘 맞는 TRIZ 40가지 발명 원리 하나를 "TRIZ 번호 · 이름"으로(알츠슐러 원래 번호).
+- visual: 그림 작가에게 줄 영어 묘사 1~2문장(발명품의 모양·재질·색·크기, 누가 어디서 쓰는지). 글자·로고는 넣지 않는다.
+- spec은 "크기 · 재료" 형식. recommend는 이 문제에 가장 잘 맞는 컨셉 번호(0~2).
+JSON만 출력: {"candidates":["아이디어 | 발상 도구"],"recommend":0,"concepts":[{"arch":"tech","tool":"","visual":"","shape":"","kind":"","name":"","line":"","parts":[["",""],["",""],["",""],["",""]],"steps":["","",""],"tech":"","triz":"","effect":"","after":"","spec":""}]}`; }
+
+const ICONS=['dog','cat','fish','pet','plant','baby','elder','kid','adult'];
+const str=(v,d='')=> (typeof v==='string'&&v.trim())?v.trim():d;
+function cleanConcepts(arr){
+  if(!Array.isArray(arr)||arr.length<3) throw new Error('컨셉 형식 오류');
+  return arr.slice(0,3).map((c,i)=>{
+    const parts = (Array.isArray(c.parts)?c.parts:[]).slice(0,4).map(p=>Array.isArray(p)?[str(p[0],'부품'),str(p[1],'')]:[str(p?.name||p,'부품'),str(p?.desc,'')]);
+    while(parts.length<4) parts.push(['추가 부품','더 멋지게 꾸며 보세요']);
+    const steps = (Array.isArray(c.steps)?c.steps:[]).slice(0,3).map(x=>str(x,''));
+    while(steps.length<3) steps.push('직접 다음 단계를 생각해 보세요');
+    return {shape: DEV[c.shape]?c.shape:['robot','box','station'][i], kind:str(c.kind,'발명 컨셉').slice(0,10), name:str(c.name,'나만의 발명품'),
+      line:str(c.line), parts, steps, tech:str(c.tech,'결합하기 기법'), tool:str(c.tool), triz:str(c.triz), arch:['tech','play','system'].includes(c.arch)?c.arch:'', visual:str(c.visual), effect:str(c.effect), after:str(c.after), spec:str(c.spec,'크기와 재료를 직접 정해 보세요')};
+  });
+}
+const LOADING = msg=>`<div class="loading"><i></i><i></i><i></i><br>${msg}</div>`;
+let REQ = 0;
+
+/* =====================================================================
+   오독(오역) 방지 시스템 — 키워드로 단계별 확인
+   ① 말 다듬기: 줄임말·오타·띄어쓰기를 표준 낱말로 고치고, 무엇을 고쳤는지 보여 준다
+   ② 뜻이 여러 개인 낱말: 문맥으로 풀리면 자동 결정, 안 풀리면 학생에게 묻는다
+   ③ 핵심 키워드 4칸: 누가 / 무엇이 / 어떤 불편 / 언제·어디서 를 뽑아 보여 주고 고칠 수 있게 한다
+   ④ 확정 키워드로만 문제 유형을 정한다 (낱말 하나에 끌려가지 않게)
+   ⑤ AI 결과 검증: 확정 키워드와 연결되지 않은 결과는 걸러 내거나 표시한다
+   ===================================================================== */
+const NORMALIZE = [
+  [/핸드폰|핸폰|휴대전화|휴대 폰/g,'휴대폰'],[/스맛폰|스마트 폰|스폰/g,'스마트폰'],[/(^|\s)폰(?=[이을를은에의도만\s]|$)/g,'$1휴대폰'],
+  [/액졍|엑정|액쩡/g,'액정'],[/댕댕이|멍멍이|댕댕/g,'강아지'],[/냥이|냥냥이/g,'고양이'],[/(^|\s)겜(?=[을이\s]|$)/g,'$1게임'],[/유툽|유투브/g,'유튜브'],
+  [/숙재/g,'숙제'],[/배고퍼|배고푸/g,'배고파'],[/드러워|더러버|디러워/g,'더러워'],[/지저분해저/g,'지저분해져'],
+  [/(^|\s)(샘|쌤)(?=[이께은\s]|$)/g,'$1선생님'],[/엄빠/g,'엄마 아빠'],[/잘안/g,'잘 안'],[/안보이/g,'안 보이'],[/안보여/g,'안 보여'],[/못보/g,'못 보'],
+  [/너무너무|넘넘|넘\s/g,'너무 '],[/([가-힣]+)때(?=[\s,.]|$)/g,'$1 때'],[/\s{2,}/g,' ']
+];
+function normalizeText(raw){
+  let t = raw.trim(); const fixes=[];
+  for(const [re,to] of NORMALIZE){
+    t = t.replace(re,(m,...a)=>{ const out = to.replace('$1', typeof a[0]==='string'?a[0]:''); if(m.trim()!==out.trim()) fixes.push([m.trim(),out.trim()]); return out; });
+  }
+  const uniq=[]; fixes.forEach(f=>{ if(!uniq.some(u=>u[0]===f[0])) uniq.push(f); });
+  return {text:t.trim(), fixes:uniq};
+}
+/* 어떤 불편(증상) 사전 */
+const SYMPTOMS = [
+  {re:/부부\s?싸움|(부모님|엄마|아빠|엄마랑 아빠|엄마 아빠)[^.,]{0,10}(싸우|싸움|싸워|다투|다퉈|말다툼|소리 지르)/,label:'가족 갈등 (부모님 다툼)',t:'family'},
+  {re:/놀리|놀려|놀림|괴롭|따돌|왕따|무시|험담|흉을|말다툼|싸우|싸움|욕을|욕해|밀치|끼워\s?주지|안\s?놀아/,label:'친구 관계 (놀림·다툼)',t:'relation'},
+  {re:/더러|지저분|얼룩|지문|손자국|자국|때가|때 묻|손때|기름때|먼지/,label:'더러워짐',t:'dirty'},
+  {re:/잘\s?안\s?보|안\s?보이|안\s?보여|흐릿|뿌옇|김이\s?서|김\s?서/,label:'잘 안 보임',t:'unseen'},
+  {re:/배고|배가\s?고|굶|밥을?\s?못\s?먹/,label:'배고픔',t:'hunger'},
+  {re:/목마|목이\s?말|시들|말라|물을?\s?(안|못)\s?(줘|주|마셔|마시)/,label:'물 부족',t:'thirst'},
+  {re:/더워|더위|덥|뜨거|땀/,label:'더위',t:'hot'},
+  {re:/추워|추위|춥|시려|얼어/,label:'추위',t:'cold'},
+  {re:/잃어버|분실|없어져/,label:'잃어버림',t:'forget'},
+  {re:/잊|깜빡|까먹|두고\s?(오|와|나)|놓고\s?(오|와)/,label:'잊어버림',t:'forget'},
+  {re:/어지럽|어질러|정리|뒤죽박죽|쓰레기|치우/,label:'어질러짐',t:'mess'},
+  {re:/위험|다치|넘어|미끄러|부딪|사고/,label:'다칠 위험',t:'safety'},
+  {re:/늦잠|졸려|졸음|잠이|못\s?자|못\s?일어나|깨우/,label:'잠 문제',t:'sleep'},
+  {re:/심심|외로|쓸쓸|지루|혼자\s?놀/,label:'외로움·심심함',t:'lonely'},
+  {re:/놓지\s?못|오래\s?(봐|보|해|써)|너무\s?많이\s?(봐|보|해|써)|중독|못\s?끊|계속\s?(봐|보|해)/,label:'너무 오래 사용',t:'phone'},
+  {re:/살이?\s?(쪘|찌|쪄)|뱃살|체중|몸무게/,label:'살이 찜',t:'exercise'},
+  {re:/편식|골고루\s?안|안\s?먹으려/,label:'골고루 안 먹음',t:'picky'},
+  {re:/싫어|귀찮|하기\s?싫|미루|안\s?하려/,label:'하기 싫음',t:'motivation'},
+  {re:/털[^.,]{0,6}(날려|날리|빠져|빠지)|털\s?날림/,label:'털 날림',t:'mess'},
+  {re:/떨려|떨리|긴장|무서|두려|겁이|겁나|불안|걱정|부끄|창피|자신감/,label:'긴장·걱정',t:'mind'},
+  {re:/젖|축축/,label:'젖음',t:null},{re:/냄새/,label:'냄새가 남',t:null},{re:/시끄|소음|소리가\s?커/,label:'시끄러움',t:null},
+  {re:/무거|무겁/,label:'무거움',t:null},{re:/고장|부서|깨져|깨짐|망가/,label:'고장·파손',t:null},{re:/오래\s?걸|느려|느리/,label:'시간이 오래 걸림',t:null},
+  {re:/불편|힘들|어려워|어렵/,label:'불편함',t:null}
+];
+const SYM_LABELS = [...new Set(SYMPTOMS.map(x=>x.label))];
+/* 무엇이(물건) 사전 */
+const OBJ_DICT = [[/휴대폰\s?액정|휴대폰\s?화면/,'휴대폰 액정'],[/스마트폰\s?(액정|화면)/,'스마트폰 액정'],[/휴대폰|스마트폰/,'휴대폰'],[/액정/,'액정'],[/태블릿|패드/,'태블릿'],[/노트북/,'노트북'],[/모니터/,'모니터'],[/(TV|티비|텔레비전)/,'TV'],
+  [/안경/,'안경'],[/거울/,'거울'],[/창문/,'창문'],[/책상/,'책상'],[/사물함/,'사물함'],[/책가방|가방/,'가방'],[/필통/,'필통'],[/연필|지우개|학용품/,'학용품'],[/준비물/,'준비물'],[/우산/,'우산'],[/신발|운동화/,'신발'],
+  [/물병|텀블러/,'물병'],[/자전거/,'자전거'],[/냉장고/,'냉장고'],[/밥그릇|그릇/,'그릇'],[/화분/,'화분'],[/어항/,'어항'],[/옷|교복/,'옷'],[/이불|침대/,'이불'],[/리모컨/,'리모컨'],[/열쇠|키를/,'열쇠'],[/교실/,'교실'],[/화장실/,'화장실'],[/쓰레기통/,'쓰레기통']];
+function findObjects(t){ return OBJ_DICT.filter(([re])=>re.test(t)).map(([,n])=>n).filter((n,i,a)=>a.indexOf(n)===i); }
+/* 언제·어디서 */
+const PLACE_TIME = ['아침','점심','저녁','밤에','새벽','주말','여름','겨울','장마','비 오는 날','눈 오는 날','햇빛','학교','교실','급식','수업','쉬는 시간','등교','하교','집에서','밖에서','여행','산책'];
+function findSituation(t){
+  const out=[]; const m = t.match(/((?:\S+\s){0,1}\S*)\s(때|동안)(?=[\s,.]|$)/);
+  if(m) out.push(m[0].trim());
+  PLACE_TIME.forEach(w=>{ if(t.includes(w) && !out.some(o=>o.includes(w))) out.push(w.replace(/에서$|에$/,'')); });
+  return out;
+}
+/* 뜻이 여러 개인 낱말 */
+const AMBIG = [
+  {w:'배', find:/(^|\s)배(가|를|는|도|\s|$)/, auto:[[/배(가|를)?[^.,]{0,4}(고프|고파|고픈|아프|아파|불러)/,'몸의 배'],[/배(가|를)?[^.,]{0,10}(열려|열리|깎|맛있|달아|썩)/,'먹는 배 (과일)'],[/배(를)?[^.,]{0,6}(타|멀미|항구|노를)/,'타는 배 (바다·강)']], opts:['몸의 배 (배고픔·배탈)','먹는 배 (과일)','타는 배 (바다·강)']},
+  {w:'눈', find:/(^|\s)눈(이|을|은|에|도|\s|$)/, auto:[[/눈(이|을)?[^.,]{0,8}(와서|와요|오는|온|내리|내려|쌓|치우|사람|싸움)/,'하늘에서 오는 눈'],[/눈(이)?[^.,]{0,6}(아프|아파|피곤|나빠|부시|따가|침침|가려)/,'보는 눈']], opts:['보는 눈 (눈이 아픔·피곤함)','하늘에서 오는 눈 (눈이 쌓임)']},
+  {w:'다리', find:/다리(가|를|는|에|\s|$)/, auto:[[/다리(가)?\s?(아프|아파|저려|저리|다쳐)/,'몸의 다리'],[/다리(를)?\s?건너/,'건너는 다리']], opts:['몸의 다리','건너는 다리 (강·길)']},
+  {w:'밤', find:/(^|\s)밤(을|이|은|\s|$)/, auto:[[/밤(을)?\s?(까|먹|구워|줍)/,'먹는 밤'],[/밤(이)?\s?(늦|어두|깊)/,'어두운 밤']], opts:['어두운 밤 (시간)','먹는 밤 (열매)']},
+  {w:'차', find:/(^|\s)차(가\s|를|에|는|도|\s|$)/, auto:[[/차(가)?\s?(많|막히|쌩쌩|달리|지나|다니)/,'자동차'],[/차(를)?\s?(마시|끓)/,'마시는 차']], opts:['자동차','마시는 차']},
+  {w:'김', find:/(^|\s)김(이|을|\s|$)/, auto:[[/김(이)?\s?(서려|서리|서|끼)/,'김 서림 (뿌연 수증기)'],[/김(을)?\s?(먹|싸|구워)/,'먹는 김']], opts:['김 서림 (뿌연 수증기)','먹는 김']},
+  {w:'말', find:/(^|\s)말(을|이|로|\s|$)/, auto:[[/말(을)?\s?(안\s?듣|못\s?하|걸|하|듣)/,'하는 말']], opts:['하는 말 (대화)','동물 말']}
+];
+
+function analyze(raw){
+  const {text, fixes} = normalizeText(raw);
+  // ② 뜻이 여러 개인 낱말
+  const autos=[], asks=[];
+  AMBIG.forEach(a=>{
+    if(!a.find.test(text)) return;
+    const hit = a.auto.find(([re])=>re.test(text));
+    if(hit) autos.push([a.w, hit[1]]); else asks.push(a);
+  });
+  // ③ 키워드 4칸 (문맥으로 정한 뜻도 반영)
+  const tg = detectTarget(text);
+  let subjSure = !(tg.id==='adult' && tg.name==='사람들');
+  const isFam = SYMPTOMS.find(x=>x.t==='family').re.test(text);
+  if(isFam){ tg.name='나'; tg.id='kid'; tg.grp='hk'; subjSure=true; }
+  const isRel = !isFam && SYMPTOMS.find(x=>x.t==='relation').re.test(text) && /(나를|나에게|내게|저를|제게|나한테|날\s)/.test(text);
+  if(isRel){ tg.name='나'; tg.id='kid'; tg.grp='hk'; subjSure=true; }
+  const syms = SYMPTOMS.filter(x=>x.re.test(text));
+  const objs = findObjects(text);
+  const sits = findSituation(text);
+  // 휴대폰류가 있는데 증상이 없거나 사용/상태가 섞이면 → 무엇이 문제인지 묻기
+  const dev = objs.some(o=>/휴대폰|스마트폰|태블릿|노트북|TV|모니터/.test(o));
+  let phoneAsk = null;
+  if(dev && !syms.some(x=>['dirty','unseen','phone'].includes(x.t)) && !syms.some(x=>x.t===null && /고장/.test(x.label)))
+    phoneAsk = {w:'휴대폰', opts:['기기 상태가 문제 (액정·고장·배터리)','쓰는 습관이 문제 (오래 봄·게임)']};
+  const autoObj = autos.find(([w,m])=>w==='배'&&!m.startsWith('몸')) ? (autos.find(([w])=>w==='배')[1].startsWith('먹는')?'배(과일)':'배(배·보트)') : '';
+  if(autoObj) objs.unshift(autoObj);
+  return {raw, text, fixes, autos, asks, phoneAsk,
+    subj:{v: subjSure?tg.name:'', sure:subjSure, sug:['나','우리 반 친구들','가족','강아지','고양이','식물','할머니']},
+    obj:{v: objs[0]||'', sure:!!objs.length, sug: objs.length?objs:['휴대폰','책상','가방','신발','우산','물병']},
+    sym:{v: syms[0]?.label||'', sure:!!syms.length, sug: syms.length? syms.map(x=>x.label).filter((v,i,a)=>a.indexOf(v)===i) : ['더러워짐','잊어버림','잃어버림','하기 싫음','고장·파손','불편함'],
+         words: syms.map(x=>(text.match(x.re)||[''])[0]).filter(Boolean)},
+    sit:{v: sits[0]||'', sure:!!sits.length, sug: sits.length?sits:['집에서','학교에서','밤에','아침에','밖에서']},
+    answers:{}
+  };
+}
+
+let AN = null;
+function analyzeInput(){
+  const raw = $('prob').value.trim();
+  if(!raw){ $('prob').focus(); return; }
+  ++REQ;
+  AN = analyze(raw);
+  $('chips').style.display='none';
+  $('specs').innerHTML='<div class="empty">위에서 키워드를 확인하고 <b>네, 맞아요</b>를 누르면<br>구체적인 문제가 나타나요.</div>';
+  $('conceptSec').style.display='none'; $('concepts').innerHTML=''; if(typeof hideCompare==='function'){ hideCompare(); showWelcome(); }
+  $('gen').disabled=true;
+  renderUnderstand();
+  $('undSec').style.display='';
+  $('undSec').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function stBadge(slot){ return slot.me?'<span class="st me">직접 확인</span>': slot.sure&&slot.v?'<span class="st ok">찾았어요</span>':'<span class="st chk">확인 필요</span>'; }
+function renderUnderstand(){
+  const a = AN;
+  const row = (key,label,sub,ph)=>`
+    <div class="slot" data-k="${key}">
+      <div class="sl">${label}<small>${sub}</small></div>
+      <div><input value="${esc(a[key].v)}" placeholder="${ph}" data-k="${key}">${stBadge(a[key])}</div>
+      <div class="sugs">${a[key].sug.map(x=>`<button type="button" data-k="${key}" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>
+    </div>`;
+  const askBlock = (q,i,kind)=>`
+    <div class="amb"><p>${kind==='phone'?'휴대폰의 무엇이 문제인가요?':`‘${esc(q.w)}’는 어떤 뜻인가요?`}</p>
+      <div class="opts">${q.opts.map(o=>`<button type="button" data-q="${esc(q.w)}" data-v="${esc(o)}" class="${a.answers[q.w]===o?'on':''}">${esc(o)}</button>`).join('')}</div></div>`;
+  const asks = [...a.asks.map(q=>askBlock(q)), ...(a.phoneAsk?[askBlock(a.phoneAsk,0,'phone')]:[])].join('');
+  const need = [...a.asks.map(q=>q.w), ...(a.phoneAsk?['휴대폰']:[])].filter(w=>!a.answers[w]);
+  $('und').innerHTML = `
+    ${a.fixes.length?`<div class="fixes">① 말 다듬기: ${a.fixes.map(([f,t])=>`${esc(f)} → <b>${esc(t)}</b>`).join(', ')}</div>`:''}
+    ${a.autos.length?`<div class="autos">② 문맥으로 뜻을 정했어요: ${a.autos.map(([w,m])=>`‘${esc(w)}’ = ${esc(m)}`).join(', ')}</div>`:''}
+    ${asks}
+    ${row('subj','누가','주인공','예: 나, 강아지')}
+    ${row('obj','무엇이','물건·장소','없으면 비워 두세요')}
+    ${row('sym','어떤 불편','무엇이 문제?','예: 더러워짐')}
+    ${row('sit','언제·어디서','상황','없으면 비워 두세요')}
+    <button type="button" class="okbtn" id="okUnd" ${need.length||!a.sym.v&&!a.obj.v?'disabled':''}>${need.length?'위에서 뜻을 먼저 골라 주세요':(!a.sym.v&&!a.obj.v?'무엇이·어떤 불편 중 하나는 채워 주세요':'네, 맞아요! 구체적인 문제 보기')}</button>`;
+  $('und').querySelectorAll('.slot input').forEach(inp=>inp.addEventListener('input',()=>{ const k=inp.dataset.k; a[k].v=inp.value.trim(); a[k].me=true; refreshOk(); inp.nextElementSibling.outerHTML=stBadge(a[k]); }));
+  $('und').querySelectorAll('.sugs button').forEach(b=>b.onclick=()=>{ const k=b.dataset.k; a[k].v=b.dataset.v; a[k].me=true; renderUnderstand(); });
+  $('und').querySelectorAll('.amb button').forEach(b=>b.onclick=()=>{ a.answers[b.dataset.q]=b.dataset.v; applyAnswer(b.dataset.q,b.dataset.v); renderUnderstand(); });
+  $('okUnd').onclick = confirmUnderstand;
+  $('hint').textContent = need.length?'뜻이 여러 개인 낱말을 먼저 골라 주세요':'키워드가 맞는지 확인해 주세요';
+}
+function refreshOk(){
+  const a=AN, need=[...a.asks.map(q=>q.w), ...(a.phoneAsk?['휴대폰']:[])].filter(w=>!a.answers[w]);
+  const ok=$('okUnd'); const bad = need.length || (!a.sym.v && !a.obj.v);
+  ok.disabled=!!bad; ok.textContent = need.length?'위에서 뜻을 먼저 골라 주세요':bad?'무엇이·어떤 불편 중 하나는 채워 주세요':'네, 맞아요! 구체적인 문제 보기';
+}
+/* 뜻을 고르면 키워드 칸에 바로 반영 */
+function applyAnswer(w,v){
+  const a=AN;
+  if(w==='배' && !v.startsWith('몸') && a.sym.v==='배고픔'){ a.sym.v=''; a.sym.sure=false; }
+  if(w==='배' && v.startsWith('먹는')){ a.obj.v='배(과일)'; a.obj.sure=true; }
+  if(w==='배' && v.startsWith('타는')){ a.obj.v='배(배·보트)'; a.obj.sure=true; }
+  if(w==='눈' && v.startsWith('하늘')){ a.sit.v = a.sit.v||'눈 오는 날'; }
+  if(w==='눈' && v.startsWith('보는')){ a.obj.v = a.obj.v||'눈'; }
+  if(w==='김' && v.startsWith('김 서림') && !a.sym.v){ a.sym.v='잘 안 보임'; }
+  if(w==='차' && v==='자동차' && !a.sym.v){ a.sym.v='다칠 위험'; }
+  if(w==='휴대폰'){ if(v.startsWith('쓰는')){ a.sym.v='너무 오래 사용'; } else if(!a.sym.v || a.sym.v==='너무 오래 사용'){ a.sym.v='고장·파손'; a.sym.sug=['더러워짐','잘 안 보임','고장·파손','무거움']; } a.sym.me=true; }
+}
+/* ④ 확정 키워드로만 문제 유형 결정 */
+function decideType(c){
+  const sym = SYMPTOMS.find(x=>x.label===c.sym) || SYMPTOMS.find(x=>c.sym && x.re.test(c.sym));
+  const t = sym?.t; const all = [c.subj,c.obj,c.sym,c.sit,c.text].join(' ');
+  const screen = /액정|화면|안경|거울|창문|유리|렌즈|모니터|TV|태블릿|노트북|휴대폰/.test(c.obj||'');
+  if(t==='dirty') return screen?'smudge':'mess';
+  if(t==='unseen') return (screen||/얼룩|지문|김/.test(all))?'smudge':'generic';
+  if(t==='motivation'||t==='exercise'){
+    if(/운동|살|체중|다이어트|걷|몸무게/.test(all)) return 'exercise';
+    if(/공부|숙제|책|시험/.test(all)) return 'study';
+    if(/채소|반찬|편식|야채/.test(all)) return 'picky';
+    if(/게임|유튜브|휴대폰|스마트폰/.test(all)) return 'phone';
+    return t==='exercise'?'exercise':'generic';
+  }
+  if(t && LIB[t]) return t;
+  if(t===null) return 'generic';   // 사전에 유형이 없는 불편(젖음·냄새 등)은 억지로 끼워 맞추지 않는다
+  return detectAllProblems(all)[0] || 'generic';
+}
+/* ⑤ 키워드 연결 검사 — '불편(증상)'이 있으면 반드시 증상 쪽 말이 들어가야 통과
+   (물건 이름만 맞는 결과는 오독의 전형이므로 통과시키지 않는다) */
+const SYM_SYNS = {family:['부모','엄마','아빠','가족','싸','다투','마음','대화','화해','불안','고마'],mind:['떨','긴장','걱정','불안','자신감','마음','무서','두려','발표','연습','용기'],relation:['놀리','놀림','놀려','괴롭','친구','마음','말','싫','그만','사과','존중','칭찬','도움','웃','모른 척'],dirty:['더러','지저분','얼룩','지문','자국','때가','먼지','닦','깨끗','기름','뿌옇','흐리','반짝'],unseen:['안 보','보이','흐리','뿌옇','김','얼룩','선명','지문','닦'],
+  hunger:['배고','밥','먹','사료','간식','먹이'],thirst:['물','목마','시들','마르','말라'],hot:['더위','더워','덥','시원','땀','뜨거'],cold:['추위','추워','따뜻','춥','얼어','시려'],
+  forget:['잊','깜빡','챙기','기억','잃어','두고','찾'],mess:['정리','어질','치우','쓰레기','청소','먼지','지저분'],safety:['위험','다치','넘어','안전','미끄','부딪','사고'],
+  sleep:['잠','졸','일어나','깨'],lonely:['심심','외로','혼자','놀','지루'],phone:['사용','오래','게임','영상','놓지','시간'],exercise:['운동','살','걷','몸','움직'],
+  picky:['먹','채소','반찬','편식','골고루'],motivation:['싫','귀찮','미루','하기','재미','지루']};
+function symWordsOf(c){
+  const sym = SYMPTOMS.find(x=>x.label===c.sym) || SYMPTOMS.find(x=>c.sym && x.re.test(c.sym));
+  const base = (sym && SYM_SYNS[sym.t]) ? SYM_SYNS[sym.t] : [];
+  const own = (c.sym||'').split(/[\s·()]+/).filter(x=>x.length>=2).flatMap(x=>[x,x.slice(0,2)]);
+  return [...new Set([...base, ...own, ...(c.symWords||[])])].filter(x=>x && x.length>=1 && !['불편','함'].includes(x));
+}
+function objWordsOf(c){ return (c.obj||'').split(/[\s·()]+/).filter(x=>x.length>=2 && !['화면'].includes(x)); }
+function kwHit(text,c){
+  const sw = symWordsOf(c);
+  if(c.sym && sw.length) return sw.some(x=>text.includes(x)) || (c.type==='relation' && /친구|놀|괴롭|마음/.test(text));
+  const ow = objWordsOf(c);
+  return !ow.length || ow.some(x=>text.includes(x));
+}
+function confirmUnderstand(){
+  const a = AN;
+  const conf = {raw:a.raw, text:a.text, subj:a.subj.v, obj:a.obj.v, sym:a.sym.v, sit:a.sit.v, symWords:a.sym.words, meanings:{...Object.fromEntries(a.autos), ...a.answers}};
+  conf.type = decideType(conf);
+  makeSpecifics(conf);
+}
+
+/* =====================================================================
+   추론 엔진 — 문장을 [누가 / 어떻게 / 얼마나 / 어디서]로 나눈 뒤
+   7가지 생각 렌즈(원인·순간·마음·반복·주변·도움·결과·도구)로 문제를 넓혀 본다
+   ===================================================================== */
+const FREQ_RE = /(자꾸|자주|계속|매일|늘|항상|맨날|또다시|또)\s?/;
+/* '~요/~다'로 끝난 문장을 '~는' 꼴로 바꿔 다른 문장에 이어 붙일 수 있게 한다 */
+function toAdn(t){
+  const rules=[[/해요$/,'하는'],[/려요$/,'리는'],[/져요$/,'지는'],[/워요$/,'운'],[/와요$/,'오는'],[/나요$/,'나는'],[/파요$/,'픈'],[/싫어요$/,'싫은'],[/없어요$/,'없는'],[/있어요$/,'있는'],[/돼요$/,'되는'],[/[가-힣]+(해|하)다$/,m=>m.replace(/(해|하)다$/,'하는')],[/([가-힣])다$/,'$1는']];
+  for(const [re,to] of rules){ if(re.test(t)) return t.replace(re,to); }
+  return null;
+}
+function parseCore(core, conf){
+  let adn = !/(요|다|음|함|니다|죠)$/.test(core);
+  if(!adn){ const c2 = toAdn(core); if(c2){ core=c2; adn=true; } }
+  const freq = (core.match(FREQ_RE)||[])[1]||'';
+  const NOUN_I = ['고양이','어린이','놀이','아이','오이','거북이','멍멍이','댕댕이','냥이','돼지','가위','나이','종이','길이','높이','넓이','깊이','사이','때가'];
+  const am = [...core.matchAll(/([가-힣A-Za-z0-9]+)(이|가)\s/g)].find(m=>!NOUN_I.includes(m[1]+m[2]) && !['때','것','수','날'].includes(m[1])) || null;
+  let A='', pre='', pred=core;
+  if(am && !['때','것','수','날','이것','그것'].includes(am[1])){ A=am[1]; pre=core.slice(0,am.index).trim(); pred=core.slice(am.index+am[0].length).trim(); }
+  const coreNF = core.replace(FREQ_RE,'').replace(/\s{2,}/g,' ').trim();
+  const sitPre = conf.sit && !core.includes(conf.sit) ? conf.sit+' ' : '';
+  return {core, coreNF, A, pre, pred, predNF:pred.replace(FREQ_RE,'').trim(), freq, adn, sitPre,
+    C: adn?core:`‘${core}’`, CNF: adn?coreNF:`‘${core}’`};
+}
+function domainOf(type, conf){
+  if(type==='relation') return 'relation';
+  if(type==='family') return 'family';
+  const sy = SYMPTOMS.find(x=>x.label===conf.sym);
+  if(type==='mind' || (sy && sy.t==='mind')) return 'mind';
+  if(['exercise','study','picky','phone','sleep'].includes(type)) return 'habit';
+  if(['smudge','mess','hot','cold','thirst','safety'].includes(type) || conf.obj) return 'thing';
+  return 'general';
+}
+const LENS_WHY = {cause:'원인을 알면 딱 맞는 해결책이 보여요',moment:'문제가 생기는 순간을 잡으면 미리 막을 수 있어요',feeling:'마음을 전할 수 있으면 상대도 달라질 수 있어요',
+  repeat:'되풀이되는 고리를 끊는 것이 핵심이에요',bystander:'주변 친구들이 달라지면 분위기가 바뀌어요',people:'혼자 참지 않고 도움을 받는 것도 해결이에요',
+  effect:'문제가 남기는 피해를 줄이는 것도 해결이에요',tool:'딱 맞는 도구가 있으면 쉽게 해결돼요'};
+const LENS_TAG = {cause:'원인',moment:'순간',feeling:'마음',repeat:'반복',bystander:'주변',people:'도움',effect:'결과',tool:'도구'};
+const WHY_DOM = {family:{feeling:'내 마음을 말하는 것도 가족을 돕는 일이에요',people:'믿을 수 있는 어른에게 이야기하는 것도 해결이에요',moment:'그 순간 내가 할 수 있는 일을 정해 두면 덜 불안해요'},mind:{feeling:'마음을 돌보면 몸의 떨림도 줄어들어요',people:'털어놓기만 해도 마음이 가벼워져요'},thing:{feeling:'기분까지 챙겨야 진짜 해결이에요'},habit:{feeling:'마음이 움직여야 습관이 바뀌어요',people:'함께하면 오래 할 수 있어요'},general:{}};
+function whyOf(l,dom){ return (WHY_DOM[dom]||{})[l] || LENS_WHY[l]; }
+function lensText(l, q, dom){
+  const jA = q.A ? josa(q.A,'이','가') : '';
+  switch(l){
+    case 'cause': return q.adn && q.A ? `${q.pre?q.pre+' ':''}${jA} 왜 ${q.pred}지 진짜 이유를 모르는 문제` : q.adn ? `왜 ${q.core}지 진짜 이유를 모르는 문제` : `${q.C} 일이 왜 생기는지 진짜 이유를 모르는 문제`;
+    case 'moment': if(dom==='family') return `${q.CNF} 순간에 내가 어떻게 해야 할지 모르는 문제`;
+      if(dom==='habit'||dom==='mind') return `${q.sitPre}${q.CNF} 일이 언제 가장 심해지는지 모르는 문제`;
+      return dom==='relation' ? `${q.sitPre}${q.C} 순간에 어떻게 해야 할지 모르는 문제` : `${q.sitPre}${q.CNF} 순간을 미리 알아채거나 막지 못하는 문제`;
+    case 'feeling': if(dom==='family') return `${q.CNF} 것을 보면 불안하고 속상한 내 마음을 말하기 어려운 문제`;
+      if(dom==='mind') return `${q.CNF} 일 때문에 자신감이 점점 줄어드는 문제`;
+      return dom==='relation' ? `${q.CNF} 일 때문에 속상한 마음을 ${q.A?q.A+'에게':'상대에게'} 말하기 어려운 문제` : `${q.CNF} 일 때문에 자꾸 짜증 나고 의욕이 떨어지는 문제`;
+    case 'repeat': if(dom==='family') return `화해해도 ${q.CNF} 일이 되풀이되는 문제`;
+      if(dom==='mind') return `연습해도 ${q.CNF} 일이 되풀이되는 문제`;
+      return dom==='relation' ? `‘그만해’라고 말해도 ${q.CNF} 일이 되풀이되는 문제` : dom==='habit' ? `마음먹어도 며칠 못 가 ${q.CNF} 일이 되풀이되는 문제` : `조심해도 ${q.CNF} 일이 되풀이되는 문제`;
+    case 'bystander': return `${q.CNF} 것을 보고도 주변 친구들이 웃거나 모른 척하는 문제`;
+    case 'people': if(dom==='family') return `${q.CNF} 일 때문에 힘든 마음을 털어놓을 곳이 없는 문제`;
+      if(dom==='mind') return `${q.CNF} 마음을 누구에게도 털어놓지 못하는 문제`;
+      return dom==='relation' ? `${q.CNF} 것을 선생님이나 가족에게 알리기 망설여지는 문제` : `${q.CNF} 일을 혼자 해결하려다 지치는 문제`;
+    case 'effect': return dom==='relation' ? `${q.CNF} 일 때문에 학교 가는 것이 싫어지는 문제` : `${q.CNF} 탓에 하루가 불편하고 다른 일까지 망치는 문제`;
+    case 'tool': return `${q.CNF} 일이 생겨도 바로 쓸 수 있는 도구가 곁에 없는 문제`;
+  }
+}
+const LENS_ORDER = {family:['cause','moment','feeling','repeat','people'], relation:['cause','moment','feeling','repeat','bystander','people','effect'], thing:['cause','moment','repeat','tool','effect'],
+  habit:['cause','moment','repeat','feeling','people'], mind:['cause','moment','feeling','repeat','people'], general:['cause','moment','repeat','tool','effect','people']};
+const FAM_REC = {cause:1,moment:2,feeling:0,repeat:2,people:0};
+const MIND_REC = {cause:0,moment:1,feeling:1,repeat:0,people:2};
+const REL_REC = {cause:2,moment:0,feeling:0,repeat:1,bystander:1,people:0,effect:1};
+const CAUSES = {family:['서로 피곤하고 바빠서','생각이 서로 달라서','마음을 말로 잘 전하지 못해서','작은 서운함이 쌓여서'],relation:['장난이라고 가볍게 생각해서','관심을 받고 싶어서','상대가 싫어하는 걸 몰라서','주변 친구들이 웃어 줘서 더 하게 돼서'],
+  thing:['물건의 재료나 모양 때문에','쓰는 방법이나 습관 때문에','날씨·장소 같은 환경 때문에'],
+  habit:['재미가 없어서','효과가 바로 안 보여서','미루거나 깜빡하게 돼서','혼자 하기 힘들어서'],
+  general:['환경 때문에','습관 때문에','알맞은 도구가 없어서'],
+  mind:['실수할까 봐 걱정돼서','연습이나 준비가 부족하다고 느껴서','다른 사람의 눈길이 신경 쓰여서','예전에 속상했던 기억 때문에']};
+function thinkMap(q, conf, dom, extraCauses){
+  const whatA = q.A ? ((q.pre && q.pre.length<=6 && !/날|때|에서|에$/.test(q.pre)) ? q.pre+' '+q.A : q.A) : '';
+  const cells = (dom==='relation'
+    ? [['하는 쪽',q.A],['겪는 사람',conf.subj],['어떻게',q.predNF],['얼마나',q.freq?`${q.freq} (되풀이됨)`:''],['어디서·언제',conf.sit]]
+    : [['누가',conf.subj],['무엇이',conf.obj||(whatA&&!(conf.subj||'').includes(q.A)?whatA:'')],['어떻게',q.adn?(q.predNF||q.coreNF):q.core],['얼마나',q.freq?`${q.freq} (되풀이됨)`:''],['어디서·언제',conf.sit]]
+  ).filter(x=>x[1]);
+  const causes = extraCauses&&extraCauses.length ? extraCauses : CAUSES[dom];
+  return `<div class="think"><b class="h">생각 지도 · 이 문제를 이렇게 나눠 생각해 봤어요</b>
+    <div class="row">${cells.map(([k,v])=>`<span><em>${k}</em>${esc(v)}</span>`).join('')}</div>
+    <div style="margin-top:4px"><em style="font-style:normal;color:#8fb7bf">가능한 원인</em><ol>${causes.slice(0,4).map(c=>`<li>${esc(c)}</li>`).join('')}</ol></div></div>`;
+}
+/* 일반 문제용 — 고른 렌즈에 맞춰 컨셉을 조립 */
+const LENS_CONCEPT = {
+ cause:{shape:'robot',kind:'원인 탐정형',name:'진짜 원인 찾는 돋보기 탐정봇',
+   line:'{C} 일이 언제·어디서·왜 생기는지 단서를 모아 진짜 원인을 찾고, 원인에 딱 맞는 해결 미션을 내 줘요',
+   parts:[['돋보기 눈 화면','문제 현장을 크게 살펴봐요'],['단서 수집 안테나','언제, 어디서 생기는지 기록해요'],['미션 카드 팔','원인에 맞는 해결 미션을 건네요'],['탐정 바퀴','문제 현장으로 출동해요']],
+   steps:['탐정봇이 문제가 생길 때마다 단서를 기록해요','단서를 모아 가장 큰 원인을 찾아요','원인에 딱 맞는 해결 미션을 내 줘요'],
+   tech:'원인 찾기 기법 (문제를 쪼개어 보기)',effect:'겉모습이 아니라 진짜 원인을 해결해서 문제가 다시 생기지 않아요.',after:'원인을 알고 나니 문제가 다시 생기지 않아요',spec:'높이 35 cm · 카메라, 화면, 바퀴'},
+ moment:{shape:'lamp',kind:'미리 알림형',name:'딱 그 순간 예고 등대',
+   line:'{C} 일이 생기기 직전의 신호(시간·장소·상황)를 알아채 불빛으로 "곧 조심!" 하고 미리 알려 줘요',
+   parts:[['예고 전등갓','위험한 순간이 다가오면 빛나요'],['조건 설정 버튼','언제 알려 줄지 미리 정해요'],['색깔 예고 불빛','초록 → 노랑 → 빨강으로 알려요'],['받침대','문 앞이나 책상 위에 둬요']],
+   steps:['문제가 자주 생기는 조건을 등대에 알려 줘요','그 조건이 다가오면 불빛이 노랗게 변해요','미리 준비해서 문제가 생기기 전에 막아요'],
+   tech:'미리 하기 기법 (예고 신호)',effect:'문제가 생긴 뒤 수습하는 대신 생기기 전에 막을 수 있어요.',after:'미리 알고 준비해서 문제가 생기지 않아요',spec:'높이 30 cm · LED, 센서, 타이머'},
+ repeat:{shape:'box',kind:'습관 챌린지형',name:'되풀이 끊기 도장 상자',
+   line:'{CNF} 일이 안 생긴 날마다 도장을 모으고, 7일을 채우면 상자가 열려 선물이 나오는 습관 게임이에요',
+   parts:[['선물 뚜껑','7일을 채우면 열려요'],['연속 기록 표시등','며칠째 성공인지 보여 줘요'],['도장 서랍','오늘의 성공 도장이 들어 있어요'],['튼튼한 바닥','잘 보이는 곳에 둬요']],
+   steps:['문제가 안 생긴 날 도장을 하나 찍어요','연속 기록이 불빛으로 쌓여 가요','7일을 채우면 상자가 열려 선물이 나와요'],
+   tech:'게임화 기법 (습관 → 도장 모으기)',effect:'되풀이되던 고리가 끊기고 스스로 막는 습관이 생겨요.',after:'도장을 모으다 보니 문제가 되풀이되지 않아요',spec:'가로 25 × 세로 20 × 높이 15 cm · 나무, LED'},
+ tool:{shape:'band',kind:'늘 곁에 형',name:'주머니 속 만능 해결 밴드',
+   line:'{C} 일이 생기는 순간 바로 꺼내 쓸 수 있게, 필요한 도구를 손목 밴드 안에 쏙 넣어 다녀요',
+   parts:[['도구 칸 뚜껑','작은 도구가 들어 있어요'],['꺼내기 버튼','누르면 도구가 톡 나와요'],['늘어나는 밴드','손목·가방끈 어디든 감아요'],['충전 칩','불빛·알림 기능에 써요']],
+   steps:['문제에 필요한 도구를 밴드에 넣어 둬요','문제가 생기면 버튼을 눌러 바로 꺼내요','도구를 쓰고 다시 넣어 두면 끝!'],
+   tech:'작게 하기 + 늘 곁에 두기 기법',effect:'도구를 찾느라 늦지 않고 그 자리에서 바로 해결해요.',after:'필요한 도구가 늘 곁에 있어서 바로 해결해요',spec:'둘레 18 cm · 실리콘, 작은 수납 칸'},
+ effect:{shape:'box',kind:'피해 막기형',name:'{OB} 지킴이 방패 덮개',
+   line:'{C} 일이 생겨도 피해가 커지지 않도록 순간 펼쳐져 감싸 주는 보호 덮개예요',
+   parts:[['접이식 방패 지붕','순간 펼쳐져 감싸요'],['지킴 표시등','잘 지켜지고 있는지 보여 줘요'],['옆 고정 고리','단단히 붙여요'],['받침','어디든 붙일 수 있어요']],
+   steps:['지킴이 덮개를 미리 달아 둬요','문제가 생기면 덮개가 순간 펼쳐져요','피해 없이 원래 상태를 지켜요'],
+   tech:'감싸기 기법 (보호막 더하기)',effect:'문제가 생겨도 피해가 작아서 걱정이 줄어요.',after:'문제가 생겨도 피해 없이 지켜져요',spec:'크기 조절 가능 · 방수 천, 스프링 살대'},
+ people:{shape:'station',kind:'함께하기형',name:'응원단 연결 스테이션',
+   line:'{C} 문제를 혼자 끙끙대지 않도록 가족·친구 응원단을 연결해 함께 해결해요',
+   parts:[['응원 카메라','도전하는 모습을 찍어요'],['응원 메시지 화면','가족·친구 응원이 떠요'],['하이파이브 버튼','누르면 응원단에게 소식이 가요'],['받침대','잘 보이는 곳에 세워요']],
+   steps:['해결 목표를 화면에 적어요','도전할 때마다 응원단에게 소식이 가요','응원 메시지를 받으며 끝까지 해내요'],
+   tech:'함께하기 기법 (사람의 힘 연결)',effect:'혼자가 아니라는 마음 덕분에 포기하지 않아요.',after:'응원 덕분에 끝까지 해냈어요',spec:'가로 25 × 세로 12 × 높이 28 cm · 화면, 카메라'}
+};
+LENS_CONCEPT.feeling = LENS_CONCEPT.people; LENS_CONCEPT.bystander = LENS_CONCEPT.people;
+const LENS_ARCH = {cause:'play',moment:'tech',repeat:'play',tool:'tech',effect:'system',people:'system'};
+Object.entries(LENS_ARCH).forEach(([l,a])=>LENS_CONCEPT[l].arch=a);
+function lensConcepts(lens, q, conf){
+  // 고른 렌즈의 컨셉을 먼저 넣고, 나머지 아키텍처(기술·놀이·시스템)를 하나씩 채운다
+  const first = LENS_CONCEPT[lens] || LENS_CONCEPT.cause;
+  const pref = ['moment','tool','cause','repeat', conf.obj?'effect':'people', conf.obj?'people':'effect'];
+  const picked = [first];
+  ['tech','play','system'].filter(a=>a!==first.arch).forEach(a=>{ const l = pref.find(x=>LENS_CONCEPT[x].arch===a && !picked.includes(LENS_CONCEPT[x])); if(l) picked.push(LENS_CONCEPT[l]); });
+  const fillL = t => t.replace(/\{C\}/g,q.C).replace(/\{CNF\}/g,q.CNF).replace(/\{OB\}/g, conf.obj||'소중한 물건');
+  return picked.map(c=>({...c, name:fillL(c.name), line:fillL(c.line)}));
+}
+
+/* 1단계 → 구체적인 문제 여러 가지 제시 */
+function offlineSpecifics(conf){
+  const raw = conf.text;
+  const d = detectTarget(conf.subj||raw);
+  const T = {id:d.id, grp:d.grp, food:d.food, name: conf.subj || '사람들'};
+  const P = conf.type;
+  const title = makeTitle(raw), core = title.replace(/\s*문제$/,'').replace(/[‘’]/g,'');
+  T.core = core; T.obj = /액정|화면/.test(conf.obj||'') ? conf.obj : (conf.obj && /휴대폰|스마트폰|태블릿|노트북|모니터|TV/.test(conf.obj) ? detectObject(conf.obj) : (conf.obj || detectObject(raw)));
+  const q = parseCore(core, conf), dom = domainOf(P, conf);
+  const lensItems = LENS_ORDER[dom].filter(l=>l!=='repeat' || q.freq || dom!=='relation')
+    .map(l=>({text:lensText(l,q,dom), type:P, lens:l, tag:LENS_TAG[l], why:whyOf(l,dom), rec: P==='relation'?REL_REC[l]:P==='mind'?MIND_REC[l]:P==='family'?FAM_REC[l]:0}));
+  let list;
+  const curated = specsFor(P,T,core);
+  if(P==='generic' || P==='relation' || P==='mind' || P==='family' || !curated.length){ list = lensItems.slice(0,5); }
+  else {
+    // 사전 문제 + 추론 렌즈 문제를 섞는다 (사전 3~4개 + 원인·순간 렌즈)
+    // 물건이 확정됐는데 사전 문장이 그 물건을 말하지 않으면 사전 문장을 줄이고 추론 문장을 늘린다
+    const objKey = (conf.obj||'').split(/[\s(]/)[0];
+    const objHits = objKey ? curated.filter(x=>x.text.includes(objKey)).length : 99;
+    const nCur = Math.min(curated.length, objHits>=2 ? 3 : 2);
+    const lensPick = nCur===3 ? ['cause','moment'] : ['cause','moment','repeat'];
+    const cur = [...curated].sort((a,b)=>(objKey&&b.text.includes(objKey))-(objKey&&a.text.includes(objKey)));
+    list = [...cur.slice(0,nCur).map(x=>({...x, tag:TYPE_LABEL[P]})), ...lensItems.filter(x=>lensPick.includes(x.lens))].slice(0,5);
+  }
+  list.push({text:title, type:P, tag:TYPE_LABEL[P], rec:0, mine:true, lens: P==='generic'?'cause':undefined});
+  return {T, list, think: thinkMap(q, conf, dom)};
+}
+async function makeSpecifics(conf){
+  const raw = conf.text;
+  const my = ++REQ;
+  $('chips').style.display='none';
+  $('conceptSec').style.display='none'; $('concepts').innerHTML=''; if(typeof hideCompare==='function'){ hideCompare(); showWelcome(); }
+  $('gen').disabled=true;
+  let res = null, warn = '';
+  if(aiReady()){
+    $('specs').innerHTML = LOADING('AI 코치가 문제를 여러 각도로 쪼개 보고 있어요...');
+    $('hint').textContent='잠시만 기다려 주세요';
+    try{
+      const j = await callGemini(specPrompt(raw, conf));
+      if(my!==REQ) return;
+      const base = offlineSpecifics(conf);
+      const T = {id: ICONS.includes(j.icon)?j.icon:base.T.id, grp:base.T.grp, name:str(j.target_name, base.T.name), food:base.T.food, core:base.T.core, obj:base.T.obj};
+      const LMAP = {'원인':'cause','순간':'moment','마음':'feeling','반복':'repeat','주변':'bystander','도움':'people','결과':'effect','도구':'tool'};
+      const list = (j.specifics||[]).slice(0,6).map(x=>{const text=str(x.text||x); const f=conf.type; const l=LMAP[str(x.lens)]||'';
+        return {text:/문제$/.test(text)?text:text+' 문제', type:f, lens:l, tag:str(x.lens||x.tag,TYPE_LABEL[f]).slice(0,6), why:str(x.why), rec:0, ai:true};}).filter(x=>x.text.length>3);
+      if(list.length<2) throw new Error('구체적인 문제 형식 오류');
+      // ⑤ 확정 키워드와 연결되지 않은 문장은 뒤로 보내고 표시
+      list.forEach(x=>x.miss=!kwHit(x.text,conf));
+      const good = list.filter(x=>!x.miss);
+      if(good.length>=3) list.splice(0,list.length,...good); else list.sort((a,b)=>a.miss-b.miss);
+      const mine = base.list[base.list.length-1]; mine.ai=true;
+      list.push(mine);
+      const q = parseCore(base.T.core, conf), dom = domainOf(conf.type, conf);
+      const an = j.analysis||{};
+      res = {T, list, ai:true, think: thinkMap(q, conf, dom, Array.isArray(an.causes)?an.causes.map(x=>str(x)).filter(Boolean):null)};
+    }catch(e){
+      if(my!==REQ) return;
+      warn = `AI 연결에 실패해서 기본 아이디어 사전으로 보여 줘요. (${esc(e.message||e)})`;
     }
-  </script>
+  }
+  if(!res) res = offlineSpecifics(conf);
+  STATE = {raw, conf, T:res.T, specs:res.list, spec:-1, concepts:[], sel:-1, ai:!!res.ai, cache:{}};
+  const kw = [['누가',conf.subj],['무엇이',conf.obj],['불편',conf.sym],['상황',conf.sit]].filter(x=>x[1]).map(([k,v])=>`<span>${k}: ${esc(v)}</span>`).join('');
+  const care = conf.type==='family' ? `<div class="care">부모님이 다투는 것은 내 잘못이 아니에요. 집에서 무섭거나 불안한 일이 계속되면 혼자 참지 말고 선생님이나 상담 선생님께 꼭 이야기해요.</div>` : conf.type==='relation' ? `<div class="care">놀림이나 괴롭힘이 계속되면 혼자 참지 말고 꼭 선생님이나 보호자에게 알려요. 도움을 요청하는 것도 멋진 해결 방법이에요.</div>` : '';
+  $('specs').innerHTML = `<div class="kwbar">${kw}</div>` + care + (res.think||'') + (warn?`<div class="warn">${warn}</div>`:'') + res.list.map((x,i)=>`
+    <button type="button" class="sitem${x.mine?' mine':''}" data-i="${i}">
+      <span class="dot"></span><span>${x.mine?'<b>내가 쓴 문제 그대로</b><br>':''}${esc(x.text)}${x.miss?'<span class="miss">키워드 확인</span>':''}${x.why?`<span class="why">${esc(x.why)}</span>`:''}</span>
+      <span class="tag${x.lens?' lens':''}">${esc(x.tag)}</span>
+    </button>`).join('');
+  $('specs').querySelectorAll('.sitem').forEach(b=>b.onclick=()=>pickSpec(+b.dataset.i));
+  $('hint').textContent='해결하고 싶은 구체적인 문제를 1개 골라 주세요';
+  $('specs').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* 2단계 → 고른 문제에 맞는 디자인 컨셉 3가지 */
+function offlineConcepts(sp){
+  const T = STATE.T;
+  if(sp.type==='generic'){ return lensConcepts(sp.lens||'cause', parseCore(T.core, STATE.conf), STATE.conf); }
+  return LIB[sp.type].concepts.map(c=>({...c, name:fill(c.name,T),
+      line:fill(c.line,T), after:fill(c.after,T), effect:fill(c.effect,T),
+      parts:c.parts.map(([a,b])=>[fill(a,T),fill(b,T)]), steps:c.steps.map(s=>fill(s,T))}));
+}
+/* Step 2 — 구체적인 문제 1개 확정 → 그라데이션 버튼 켜기 */
+function pickSpec(i){
+  STATE.spec=i; STATE.sel=-1; STATE.concepts=[];
+  document.querySelectorAll('.sitem').forEach((b,k)=>b.classList.toggle('sel',k===i));
+  const sp = STATE.specs[i];
+  STATE.title = sp.text; STATE.core = sp.text.replace(/\s*문제$/,'').replace(/[‘’]/g,'');
+  $('picked').innerHTML = `선택한 문제: <b>${esc(sp.text)}</b>`;
+  $('conceptSec').style.display='';
+  $('genc').disabled=false; $('genc').textContent='✨ 발명품 디자인 3개 생성하기';
+  $('gen').disabled=true;
+  $('hint').textContent='✨ 버튼을 누르면 왼쪽 화면에 발명품 3개가 나란히 펼쳐져요';
+  hideCompare(); showWelcome();
+  setTimeout(()=>$('conceptSec').scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+}
+function showWelcome(){ $('holder').innerHTML=''; $('holder').style.width=$('holder').style.height='0'; $('toolbar').style.display='none'; $('welcome').style.display=''; $('stage').classList.remove('cmp'); }
+function hideCompare(){ $('compare').style.display='none'; $('stage').classList.remove('cmp'); }
+
+/* Step 3 — 3가지 발명품 생성 → 왼쪽 무대에 3열 카드 */
+async function genConcepts(){
+  if(STATE.spec<0) return;
+  const i = STATE.spec, sp = STATE.specs[i], T = STATE.T, my = ++REQ;
+  STATE.sel=-1; $('gen').disabled=true;
+  $('welcome').style.display='none'; $('holder').innerHTML=''; $('holder').style.width=$('holder').style.height='0'; $('toolbar').style.display='none';
+  $('stage').classList.add('cmp'); $('compare').style.display='flex';
+  let concepts = null, rec = sp.rec, warn='';
+  STATE.round = STATE.round || {};
+  const round = STATE.round[i] = (STATE.round[i]===undefined ? 0 : STATE.round[i]+1);
+  if(round>0 && STATE.cache[i]) delete STATE.cache[i];   // '다시 생성하기'는 늘 새 아이디어
+  STATE.seenNames = STATE.seenNames || new Set();
+  if(STATE.ai && aiReady()){
+    if(STATE.cache[i]){ ({concepts, rec} = STATE.cache[i]); }
+    else{
+      $('genc').disabled=true; $('genc').textContent='발명품을 떠올리는 중...';
+      $('compare').innerHTML = `<div class="cload"><i></i><i></i><i></i><br><br>‘${esc(sp.text)}’<br>이 문제만을 위한 기발한 발명품 3개를 떠올리고 있어요...</div>`;
+      try{
+        const j = await callGemini(conceptPrompt(STATE.raw, sp.text, T, STATE.conf, [...STATE.seenNames].slice(-15)), 1.15);
+        if(my!==REQ) return;
+        concepts = cleanConcepts(j.concepts); rec = [0,1,2].includes(j.recommend)?j.recommend:0;
+        STATE.cache[i] = {concepts, rec};
+      }catch(e){
+        if(my!==REQ) return;
+        warn = `AI 연결에 실패해서 기본 컨셉을 보여 줘요. (${esc(e.message||e)})`;
+      }
+    }
+  }
+  if(!concepts){
+    // 첫 번째는 검증된 사전 아이디어, '다시 생성하기'부터는 발상 엔진이 매번 새 조합을 만든다
+    concepts = round===0 ? offlineConcepts(sp).map(c=>({...c})) : genIdeas(sp.type, T, STATE.conf);
+    if(round>0) rec = 0;
+  }
+  concepts.forEach(c=>STATE.seenNames.add(c.name));
+  ({list:concepts, rec} = arrangeByArch(concepts, rec));
+  STATE.cache[i] = STATE.cache[i] || {concepts, rec};
+  STATE.concepts = concepts; STATE.rec = rec; STATE.warn = warn;
+  $('genc').disabled=false; $('genc').textContent=`✨ 새로운 발명품 3개 더 떠올리기 (${round+2}번째 묶음)`;
+  STATE.roundNow = round;
+  renderCompare();
+  startImages(concepts);
+  $('hint').textContent='왼쪽 화면에서 3가지 발명품을 비교하고 1개를 골라요';
+}
+function renderCompare(){
+  const T = STATE.T, sel = STATE.sel;
+  const chosen = sel>=0 ? STATE.concepts[sel] : null;
+  $('compare').innerHTML = `
+    <div class="cbanner">
+      <div class="ptxt"><small>STEP 3 · 해결할 문제 · 아이디어 묶음 #${(STATE.roundNow||0)+1} · ${aiReady()?'AI가 매번 새로 발상':'기본 모드: 버튼을 누를 때마다 새 조합 · 더 기발한 아이디어는 AI 모드'}</small><b>${esc(STATE.title)}</b></div>
+      <div class="state${chosen?' done':''}">${chosen?`‘${esc(chosen.name)}’ 선택 완료!`:'3가지 중 마음에 드는 발명품 1개를 골라 주세요'}</div>
+      <button class="bgen" ${chosen?'':'disabled'} onclick="makeNote()">발명 노트 생성하기!</button>
+    </div>
+    ${STATE.warn?`<div class="warn" style="color:#b3261e">${STATE.warn}</div>`:''}
+    <div class="cgrid${sel>=0?' has-sel':''}">
+    ${STATE.concepts.map((c,k)=>`
+      <div class="icard${k===sel?' sel':''}" style="--c:${COLORS[k].c};--cl:${COLORS[k].cl};--c2:${ARCH[k].c2}" data-i="${k}">
+        <div class="arch">${ARCH[k].icon}<div><b>${ARCH[k].name}</b><small>${ARCH[k].sub}</small></div><span class="ano">${k+1}</span></div>
+        ${STATE.ai&&!kwHit(c.name+' '+c.line,STATE.conf)?'<span class="miss">키워드 확인</span>':''}
+        <div class="top"><span class="kind">${esc(c.kind)}</span>${k===STATE.rec?'<span class="rec">추천</span>':''}<span class="num">발명품 ${k+1}</span></div>
+        <div class="ill">${illHTML(c,k)}</div>
+        <div class="body">
+          <h3>${esc(c.name)}</h3>
+          <div class="tool"><b>발상 도구</b> · ${esc(c.tool || (c.tech||'').split('(')[0].replace(/기법\s*$/,'').trim())}</div>
+          <div class="line">${esc(c.line)}</div>
+          <div><div class="sub">주요 부품 4가지</div><ol>${c.parts.map(([a,b],n)=>`<li><i>${n+1}</i><div><b>${esc(a)}</b> <span>${esc(b)}</span></div></li>`).join('')}</ol></div>
+          <div class="triz"><div class="sub">발명 기법</div><b>${esc(trizOf(c))}</b><br>${esc(c.tech)}</div>
+          <div class="eff"><div class="sub">기대 효과</div>${esc(c.effect)}</div>
+        </div>
+        <button type="button" class="pickb">${k===sel?'선택됨 ✓':'이 발명품 선택하기'}</button>
+      </div>`).join('')}
+    </div>`;
+  $('compare').querySelectorAll('.icard').forEach(el=>el.onclick=()=>pick(+el.dataset.i));
+}
+/* 카드 선택 → 하이라이트 + 빨간 버튼 켜기 */
+function pick(i){
+  STATE.sel=i;
+  renderCompare();
+  $('gen').disabled=false; $('hint').textContent='좋아요! 빨간 버튼을 눌러 발명 노트를 만들어요';
+}
+/* A4 → 다시 3열 비교 */
+function backToCompare(){
+  if(!STATE.concepts || !STATE.concepts.length) return;
+  $('holder').innerHTML=''; $('holder').style.width=$('holder').style.height='0'; $('toolbar').style.display='none';
+  $('welcome').style.display='none'; $('stage').classList.add('cmp'); $('compare').style.display='flex';
+  renderCompare(); $('stage').scrollTop=0;
+  $('hint').textContent='다른 발명품을 골라 다시 노트를 만들 수 있어요';
+}
+
+function makeNote(){
+  if(STATE.sel<0) return;
+  const c = STATE.concepts[STATE.sel], col = COLORS[STATE.sel], T = STATE.T;
+  const now = new Date();
+  const date = `${now.getFullYear()}. ${now.getMonth()+1}. ${now.getDate()}.`;
+  const no = String(Math.floor(1000+Math.random()*9000));
+  const who = $('who').value.trim();
+  $('holder').innerHTML = `
+  <div class="sheet" style="--c:${col.c};--cl:${col.cl}">
+    <div class="sh-head">
+      <div class="brand">나만의 발명 노트<small>SEOCHON INVENTION NOTE · No.${no}</small></div>
+      <div class="meta"><div><b>날짜</b>${date}</div><div><b>발명가</b><span class="fill">${esc(who)}</span></div></div>
+    </div>
+    <div class="problem"><div class="plab">해결하고 싶은 문제</div><h2>${esc(STATE.title)}</h2>${STATE.conf?`<div class="kwline">${[['누가',STATE.conf.subj],['무엇이',STATE.conf.obj],['어떤 불편',STATE.conf.sym],['언제·어디서',STATE.conf.sit]].filter(x=>x[1]).map(([k,v])=>`<b>${k}</b> ${esc(v)}`).join(' · ')}</div>`:''}</div>
+    <div class="concept">
+      ${c.img?`<img class="cimg" src="${c.img}" alt="">`:scene(c,T,col)}
+      <div><span class="kind">${ARCH[STATE.sel]?ARCH[STATE.sel].name+' · ':''}${esc(c.kind)}</span><h3>${esc(c.name)}</h3><p>${esc(c.line)}</p></div>
+    </div>
+    <div class="main">
+      <div class="blue">${blueprint(c,col)}</div>
+      <div class="parts">
+        <div class="sec-t">주요 부품</div>
+        ${c.parts.map(([a,b],i)=>`<div class="part"><div class="n">${i+1}</div><div><b>${esc(a)}</b><span>${esc(b)}</span></div></div>`).join('')}
+        <div class="spec"><b>크기와 재료</b><br>${esc(c.spec)}</div>
+      </div>
+    </div>
+    <div>
+      <div class="sec-t">이렇게 작동해요</div>
+      <div class="steps">${c.steps.map((s,k)=>`<div class="stepbox">${stepIcon(k,c,T,col)}<div><div class="sn">STEP ${k+1}</div><p>${esc(s)}</p></div></div>`).join('')}</div>
+    </div>
+    <div class="duo">
+      <div>
+        <div class="sec-t">발명 전과 발명 후</div>
+        <div class="ba"><div class="before"><b>발명 전</b>${esc(STATE.core)}</div><div class="arr">→</div><div class="after"><b>발명 후</b>${esc(c.after)}</div></div>
+      </div>
+      <div>
+        <div class="sec-t">발명 기법과 기대 효과</div>
+        <div class="tech"><b>${esc(trizOf(c))}</b><br>${esc(c.tech)}<br>${esc(c.effect)}</div>
+      </div>
+    </div>
+    <div class="bottom">
+      <div class="grow"><div class="sec-t">더 멋지게 발전시키려면? (직접 써 보세요)</div><div class="wline"></div><div class="wline"></div></div>
+      <div class="stamp">선생님<br>확인</div>
+    </div>
+    ${STATE.conf&&STATE.conf.type==='family'?'<div class="sheetcare">부모님이 다투는 것은 내 잘못이 아니에요. 무섭거나 불안한 일이 계속되면 선생님이나 상담 선생님께 꼭 이야기해요.</div>':''}
+    ${STATE.conf&&STATE.conf.type==='relation'?'<div class="sheetcare">놀림이나 괴롭힘이 계속되면 혼자 참지 말고 꼭 선생님이나 보호자에게 알려요.</div>':''}
+    <div class="foot">서촌초 AI 발명 키오스크로 만든 아이디어 스케치예요. 실제로 만들기 전에 안전과 재료를 선생님과 함께 확인해요.</div>
+  </div>`;
+  $('welcome').style.display='none'; hideCompare();
+  $('toolbar').style.display='flex'; $('stage').scrollTop=0;
+  fit();
+}
+function fit(){
+  const s = document.querySelector('.holder .sheet'); if(!s) return;
+  const st = $('stage');
+  const sw = s.offsetWidth, sh = s.offsetHeight;
+  const k = Math.min((st.clientWidth-40)/sw, (st.clientHeight-100)/sh, 1.3);
+  s.style.transform = `scale(${k})`;
+  $('holder').style.width = sw*k+'px'; $('holder').style.height = sh*k+'px';
+}
+window.addEventListener('resize',fit);
+function resetAll(){
+  showWelcome(); hideCompare(); $('compare').innerHTML='';
+  $('prob').value=''; $('who').value='';
+  $('specs').innerHTML='<div class="empty">문제를 입력하고 <b>아이디어 떠올리기</b>를 누르면<br>더 구체적인 문제들이 여기에 나타나요.</div>';
+  $('concepts').innerHTML=''; $('conceptSec').style.display='none'; $('chips').style.display=''; $('undSec').style.display='none'; AN=null;
+  $('gen').disabled=true; $('hint').textContent='구체적인 문제와 발명품을 고르면 버튼이 켜져요';
+  STATE={concepts:[],sel:-1,raw:''}; $('prob').focus();
+}
+</script>
 </body>
 </html>
